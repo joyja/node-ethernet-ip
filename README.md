@@ -240,6 +240,103 @@ PLC.forEach(tag => {
     });
 });
 ```
+### Newest Capabilities
+
+#### Getting a List of Available Controller Tags and Structure Templates
+
+```javascript
+const { Controller, TagList } = require("ethernet-ip");
+
+const PLC = new Controller();
+
+const tagList = new TagList();
+
+PLC.connect("192.168.1.1", 0).then(async () => {
+    
+    // Get all controller tags and program tags
+    await PLC.getControllerTagList(tagList)
+
+    // Displays all tags
+    console.log(tagList.tags)
+
+    // Displays all templates
+    console.log(tagList.templates)
+
+    // Displays program names
+    console.log(tagList.programs)
+
+    
+});
+```
+
+TagList.tags[] Object
+```javascript
+ {
+    id: Number, // Instance ID
+    program: String, // Name of program scope of tag. {Null} is controller scope
+    type {
+        typeCode: Number, // Data type code
+        typeName: String, // Data type name
+        structure: Boolean, // TRUE if is structure.
+        arrayDims: Number, // Number of dimmensions of array. If not array = 0
+        reserved: Boolean // TRUE if is reserved
+    }
+}
+```
+
+#### Reading/Writing LINT - Node.js >= 12.0.0
+
+```javascript
+const { Controller, Tag } = require("ethernet-ip");
+
+const PLC = new Controller();
+
+const tag = new Tag('BigInteger1');
+
+PLC.connect("192.168.1.1", 0).then(async () => {
+    
+    // Read LINT
+    await PLC.readTag(tag)
+
+    // Displays all tags
+    console.log(tag.value)  // output: 123456789n
+
+    //Big Number Maths
+    tag.value = tag.value + 1n // add 1 
+    console.log(tag.value) // output: 123456790n 
+    
+    //Write new Big Number to 
+    await PLC.writeTag(tag)
+
+    
+});
+```
+
+#### Reading/Writing Strings
+
+```javascript
+const { Controller, Tag, TagList, Structure } = require("ethernet-ip");
+
+const PLC = new Controller();
+
+const tag = new Tag('BigInteger1');
+
+PLC.connect("192.168.1.1", 0).then(async () => {
+    
+    const tagList = new TagList();
+    await PLC.getControllerTagList(tagList);
+
+    const stringStructure = new Structure('String1', tagList, {Optional Program Name});
+    await PLC.readTag(stringStructure);
+
+    console.log(stringStructure.value);
+
+    stringStructure.value = "New String Value";
+    await PLC.writeTag(stringStructure)
+    
+});
+```
+
 
 ## Demos
 

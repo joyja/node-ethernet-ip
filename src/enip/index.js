@@ -283,8 +283,6 @@ class ENIP extends Socket {
 
     const events = Object.keys(eventSpec);
 
-    console.log('CONSUMING', events);
-
     return new Promise((resolve, reject) => {
       const listeners = {};
 

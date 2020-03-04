@@ -13,3 +13,6 @@
 
 # Ignore local test
 /src/maintest.js
+
+# Mac finder files
+.DS_Store

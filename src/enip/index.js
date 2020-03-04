@@ -4,6 +4,7 @@ const encapsulation = require("./encapsulation");
 const CIP = require("./cip");
 const { promiseTimeout } = require("../utilities");
 const { lookup } = require("dns");
+const colors = require('colors');
 
 /**
  * Low Level Ethernet/IP
@@ -255,13 +256,68 @@ class ENIP extends Socket {
       const packet = connected
         ? sendUnitData(session.id, data, connection.id, connection.seq_num)
         : sendRRData(session.id, data, timeout);
-
       if (cb) {
         this.write(packet, cb);
       } else {
         this.write(packet);
       }
     }
+  }
+
+  /**
+   * Consume the specified event(s) and resolve with the result.
+   *
+   * @param {String | Object} eventSpec  May be one of the following:
+   * - {String} event name: Resolves once the named event fires, returning the
+   *   event data
+   * - {Object} map of event names to handler functions: Promise resolves to the
+   *   first truthy value returned by a handler.
+   * @param {Number} [timeout] (msecs)
+   */
+  consume(eventSpec, timeout = 10000) {
+    // If eventSpec is a string, build basic handler map for it
+    if (typeof(eventSpec) == 'string') eventSpec = {[eventSpec]: (err, v) => {
+      if (err) throw err;
+      return v;
+    }};
+
+    const events = Object.keys(eventSpec);
+
+    console.log('CONSUMING', events);
+
+    return new Promise((resolve, reject) => {
+      const listeners = {};
+
+      // Finish (maybe) processing events
+      const finish = (err, data) => {
+        // If no err or data then handler(s) are not done processing
+        if (!err && data == null) return;
+
+        // Cleanup
+        clearTimeout(timer);
+        for (const [event, listener] of Object.entries(listeners)) {
+          this.removeListener(event, listener);
+        }
+
+        // Resolve / reject
+        (err ? reject(err) : resolve(data))
+      }
+
+      // Connect event handlers
+      for (const event in eventSpec) {
+        listeners[event] = (err, data) => {
+          try {
+            finish(null, eventSpec[event](err, data));
+          } catch (err) {
+            finish(err);
+          }
+        };
+
+        this.on(event, listeners[event]);
+      }
+
+      const timer = setTimeout(() => finish(new Error(`consume(${events}) TIMEOUT`)), timeout);
+    });
   }
 
   /**

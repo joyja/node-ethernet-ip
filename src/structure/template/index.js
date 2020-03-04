@@ -137,42 +137,28 @@ class Template {
     });
   }
 
-  _getTemplate(PLC) {
-    return new Promise(async (resolve, reject) => {
-      const reqSize = this._attributes.ObjDefinitionSize * 4 - 16; // Full template request size calc
-      let dataBuffer = Buffer.alloc(0);
-      let currOffset = 0;
+  async _getTemplate(PLC) {
+    let reqSize = this._attributes.ObjDefinitionSize * 4 - 16;
+    let buf = Buffer.alloc(0);
 
-      // Recusive Function incase template is bigger than max packet size
-      const getTempData = (offset, getTempReqSize) => {
-        return new Promise((res, rej) => {
-          const cipData = this._buildGetTemplateCIP(offset, getTempReqSize);
+    const cipData = this._buildGetTemplateCIP(buf.length, reqSize - buf.length);
+    PLC.write_cip(cipData);
+
+    await PLC.consume({
+      'Read Tag': (err, data) => {
+        if (err && err.generalStatusCode !== 6) throw err;
+
+        buf = Buffer.concat([buf, data]);
+        if (err && err.generalStatusCode === 6) {
+          const cipData = this._buildGetTemplateCIP(buf.length, reqSize - buf.length);
           PLC.write_cip(cipData);
-
-          PLC.on("Read Tag", (error, data) => {
-            PLC.removeAllListeners("Read Tag");
-
-            if (error && error.generalStatusCode !== 6) {
-              rej(error);
-              return;
-            }
-
-            dataBuffer = Buffer.concat([dataBuffer, data]);
-            if (error && error.generalStatusCode === 6) {
-              currOffset += data.length;
-              res(getTempData(currOffset, reqSize - currOffset));
-            } else {
-              res();
-            }
-          });
-        });
-      };
-
-      await getTempData(currOffset, reqSize - currOffset).catch(reject);
-
-      this._parseReadTemplate(dataBuffer);
-      resolve();
+        } else {
+          return buf;
+        }
+      }
     });
+
+    this._parseReadTemplate(buf);
   }
 
   async getTemplate(PLC, templateID) {

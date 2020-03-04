@@ -230,34 +230,12 @@ class Controller extends ENIP {
       portPath
     ]);
 
-    const forwardOpenPacket = Buffer.concat([
-      MR,
-      forwardOpenData,
-      connectionPath
-    ]);
-
     super.establishing_conn = true;
     super.established_conn = false;
 
-    super.write_cip(forwardOpenPacket); // We need to bypass unconnected send for now
-
-    const readPropsErr = new Error(
-      "TIMEOUT occurred while trying forwardOpen Request."
-    );
-
-    // Wait for Response
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Forward Open", (err, data) => {
-          if (err) reject(err);
-          resolve(data);
-        });
-      }),
-      10000,
-      readPropsErr
-    );
-
-    this.removeAllListeners("Forward Open");
+    // We need to bypass unconnected send for now
+    super.write_cip(Buffer.concat([ MR, forwardOpenData, connectionPath ]));
+    const data = await this.consume('Forward Open');
 
     const OTconnID = data.readUInt32LE(0); // first 4 Bytes are O->T connection ID
     super.id_conn = OTconnID;
@@ -301,32 +279,8 @@ class Controller extends ENIP {
       portPath
     ]);
 
-    // Fully assembled packet
-    const forwardClosePacket = Buffer.concat([
-      MR,
-      forwardCloseData,
-      connectionPath
-    ]);
-
-    super.write_cip(forwardClosePacket); // We need to bypass unconnected send for now
-
-    const readPropsErr = new Error(
-      "TIMEOUT occurred while trying forwardClose Request."
-    );
-
-    // Wait for Response
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Forward Close", (err, data) => {
-          if (err) reject(err);
-          resolve(data);
-        });
-      }),
-      10000,
-      readPropsErr
-    );
-
-    this.removeAllListeners("Forward Close");
+    super.write_cip(Buffer.concat([ MR, forwardCloseData, connectionPath ]) );
+    const data = await this.consume('Forward Close');
 
     const OTconnID = data.readUInt32LE(0); // first 4 Bytes are O->T connection ID
     super.id_conn = OTconnID;
@@ -379,27 +333,8 @@ class Controller extends ENIP {
     ]);
 
     // Message Router to Embed in UCMM
-    const MR = CIP.MessageRouter.build(GET_ATTRIBUTE_ALL, identityPath, []);
-
-    this.write_cip(MR);
-
-    const readPropsErr = new Error(
-      "TIMEOUT occurred while reading Controller Props."
-    );
-
-    // Wait for Response
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Get Attribute All", (err, data) => {
-          if (err) reject(err);
-          resolve(data);
-        });
-      }),
-      10000,
-      readPropsErr
-    );
-
-    this.removeAllListeners("Get Attribute All");
+    this.write_cip(CIP.MessageRouter.build(GET_ATTRIBUTE_ALL, identityPath, []));
+    const data = await this.consume('Get Attribute All');
 
     // Parse Returned Buffer
     this.state.controller.serial_number = data.readUInt32LE(10);
@@ -455,28 +390,8 @@ class Controller extends ENIP {
       LOGICAL.build(LOGICAL.types.AttributeID, 0x05) // Local Time Attribute ID
     ]);
 
-    // Message Router to Embed in UCMM
-    const MR = CIP.MessageRouter.build(GET_ATTRIBUTE_SINGLE, identityPath, []);
-
-    this.write_cip(MR);
-
-    const readPropsErr = new Error(
-      "TIMEOUT occurred while reading Controller Clock."
-    );
-
-    // Wait for Response
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Get Attribute Single", (err, data) => {
-          if (err) reject(err);
-          resolve(data);
-        });
-      }),
-      10000,
-      readPropsErr
-    );
-
-    this.removeAllListeners("Get Attribute Single");
+    this.write_cip(CIP.MessageRouter.build(GET_ATTRIBUTE_SINGLE, identityPath, []));
+    const data = await this.consume('Get Attribute Single');
 
     // Parse Returned Buffer
     let wallClockArray = [];
@@ -529,28 +444,8 @@ class Controller extends ENIP {
       LOGICAL.build(LOGICAL.types.AttributeID, 0x05) // Local Time Attribute ID
     ]);
 
-    // Message Router to Embed in UCMM
-    const MR = CIP.MessageRouter.build(SET_ATTRIBUTE_SINGLE, identityPath, buf);
-
-    this.write_cip(MR);
-
-    const writeClockErr = new Error(
-      "TIMEOUT occurred while writing Controller Clock."
-    );
-
-    // Wait for Response
-    await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Set Attribute Single", (err, data) => {
-          if (err) reject(err);
-          resolve(data);
-        });
-      }),
-      10000,
-      writeClockErr
-    );
-
-    this.removeAllListeners("Set Attribute Single");
+    this.write_cip(CIP.MessageRouter.build(SET_ATTRIBUTE_SINGLE, identityPath, buf));
+    const data = await this.consume('Set Attribute Single');
 
     this.state.controller.time = date;
   }
@@ -733,36 +628,8 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   async _readTag(tag, size = null) {
-    const MR = tag.generateReadMessageRequest(size);
-
-    this.write_cip(MR);
-
-    const readTagErr = new Error(
-      `TIMEOUT occurred while writing Reading Tag: ${tag.name}.`
-    );
-
-    // Wait for Response
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Read Tag", async (err, data) => {
-          if (err && err.generalStatusCode !== 6) {
-            reject(err);
-            return;
-          }
-
-          if (err && err.generalStatusCode === 6) {
-            await this._readTagFragmented(tag, size).catch(reject);
-            resolve(null);
-          } else {
-            resolve(data);
-          }
-        });
-      }),
-      10000,
-      readTagErr
-    );
-
-    this.removeAllListeners("Read Tag");
+    this.write_cip(tag.generateReadMessageRequest(size));
+    const data = await this.consume('Read Tag');
 
     if (data) {
       tag.parseReadMessageResponse(data);
@@ -778,44 +645,27 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   async _readTagFragmented(tag, size = null) {
-    let offset = 0;
-    let MR = tag.generateReadMessageRequestFrag(offset, size);
-    this.write_cip(MR);
-
     const typeSize = tag.type === "STRUCT" ? 4 : 2;
-
-    const readTagErr = new Error(
-      `TIMEOUT occurred while writing Reading Tag: ${tag.name}.`
-    );
-
     let retData = Buffer.alloc(0);
+    let offset = 0;
 
-    const data = await promiseTimeout(
-      new Promise((resolve, reject) => {
-        this.on("Read Tag Fragmented", (err, data) => {
-          if (err && err.generalStatusCode !== 6) {
-            reject(err);
-            return;
-          }
+    this.write_cip(tag.generateReadMessageRequestFrag(offset, size));
 
-          if (offset > 0) data = data.slice(typeSize);
+    const data = await this.consume({
+      'Read Tag Fragmented': (err, data) => {
+        if (err && err.generalStatusCode !== 6) throw err;
 
-          if (err && err.generalStatusCode === 6) {
-            retData = Buffer.concat([retData, data]);
-            offset += data.length - typeSize;
-            MR = tag.generateReadMessageRequestFrag(offset, size);
-            this.write_cip(MR);
-          } else {
-            retData = Buffer.concat([retData, data]);
-            resolve(retData);
-          }
-        });
-      }),
-      10000,
-      readTagErr
-    );
+        if (offset > 0) data = data.slice(typeSize);
 
-    this.removeAllListeners("Read Tag Fragmented");
+        retData = Buffer.concat([retData, data]);
+        if (err && err.generalStatusCode === 6) {
+          offset += data.length - typeSize;
+          this.write_cip(tag.generateReadMessageRequestFrag(offset, size));
+        } else {
+          return retData;
+        }
+      }
+    });
 
     tag.parseReadMessageResponse(data);
   }
@@ -829,43 +679,28 @@ class Controller extends ENIP {
    * @returns {Promise}
    * @memberof Controller
    */
-  async _writeTag(tag, value = null, size = 0x01) {
+  _writeTag(tag, value = null, size = 0x01) {
     if (tag.state.tag.value.length > 480) {
       return this._writeTagFragmented(tag, value, size);
     }
-    const MR = tag.generateWriteMessageRequest(value, size);
 
-    this.write_cip(MR);
+    this.write_cip(tag.generateWriteMessageRequest(value, size));
 
-    const writeTagErr = new Error(
-      `TIMEOUT occurred while writing Writing Tag: ${tag.name}.`
-    );
+    return this.consume({
+      // Full Tag Writing
+      'Write Tag': (err, data) => {
+        if (err) throw err;
+        tag.unstageWriteRequest();
+        return data;
+      },
 
-    // Wait for Response
-    await promiseTimeout(
-      new Promise((resolve, reject) => {
-        // Full Tag Writing
-        this.on("Write Tag", (err, data) => {
-          if (err) reject(err);
-
-          tag.unstageWriteRequest();
-          resolve(data);
-        });
-
-        // Masked Bit Writing
-        this.on("Read Modify Write Tag", (err, data) => {
-          if (err) reject(err);
-
-          tag.unstageWriteRequest();
-          resolve(data);
-        });
-      }),
-      10000,
-      writeTagErr
-    );
-
-    this.removeAllListeners("Write Tag");
-    this.removeAllListeners("Read Modify Write Tag");
+      // Masked Bit Writing
+      'Read Modify Write Tag': (err, data) => {
+        if (err) throw err;
+        tag.unstageWriteRequest();
+        return data;
+      }
+    });
   }
 
   /**
@@ -877,7 +712,7 @@ class Controller extends ENIP {
    * @returns {Promise}
    * @memberof Controller
    */
-  async _writeTagFragmented(tag, value = null, size = 0x01) {
+  _writeTagFragmented(tag, value = null, size = 0x01) {
     let offset = 0;
     const maxPacket = 470;
     let valueFragment = tag.state.tag.value.slice(offset, maxPacket);
@@ -886,42 +721,33 @@ class Controller extends ENIP {
     this.write_cip(MR);
     let numWrites = 0;
     let totalWrites = Math.ceil(tag.state.tag.value.length / maxPacket);
-    const writeTagErr = new Error(
-      `TIMEOUT occurred while writing Writing Tag: ${tag.name}.`
-    );
 
-    // Wait for Response
-    await promiseTimeout(
-      new Promise((resolve, reject) => {
-        // Full Tag Writing
-        this.on("Write Tag Fragmented", (err, data) => {
-          if (err) return reject(err);
+    return this.consume({
+      // Full Tag Writing
+      'Write Tag Fragmented': (err, data) => {
+        if (err) throw err;
 
-          offset += maxPacket;
-          numWrites++;
-          if (numWrites < totalWrites) {
-            valueFragment = tag.state.tag.value.slice(
-              offset,
-              maxPacket * totalWrites
-            );
-            MR = tag.generateWriteMessageRequestFrag(
-              offset,
-              valueFragment,
-              size
-            );
-            this.write_cip(MR);
-          } else {
-            tag.unstageWriteRequest();
-            return resolve(data);
-          }
-        });
-      }),
-      10000,
-      writeTagErr
-    );
-
-    this.removeAllListeners("Write Tag Fragmented");
+        offset += maxPacket;
+        numWrites++;
+        if (numWrites < totalWrites) {
+          valueFragment = tag.state.tag.value.slice(
+            offset,
+            maxPacket * totalWrites
+          );
+          MR = tag.generateWriteMessageRequestFrag(
+            offset,
+            valueFragment,
+            size
+          );
+          this.write_cip(MR);
+        } else {
+          tag.unstageWriteRequest();
+          return data;
+        }
+      }
+    });
   }
+
   /**
    * Reads All Tags in the Passed Tag Group
    *
@@ -932,28 +758,10 @@ class Controller extends ENIP {
   async _readTagGroup(group) {
     const messages = group.generateReadMessageRequests();
 
-    const readTagGroupErr = new Error(
-      "TIMEOUT occurred while writing Reading Tag Group."
-    );
-
     // Send Each Multi Service Message
     for (let msg of messages) {
       this.write_cip(msg.data);
-
-      // Wait for Controller to Respond
-      const data = await promiseTimeout(
-        new Promise((resolve, reject) => {
-          this.on("Multiple Service Packet", (err, data) => {
-            if (err) reject(err);
-
-            resolve(data);
-          });
-        }),
-        10000,
-        readTagGroupErr
-      );
-
-      this.removeAllListeners("Multiple Service Packet");
+      const data = await this.consume('Multiple Service Packet');
 
       // Parse Messages
       group.parseReadMessageResponses(data, msg.tag_ids);
@@ -970,28 +778,10 @@ class Controller extends ENIP {
   async _writeTagGroup(group) {
     const messages = group.generateWriteMessageRequests();
 
-    const writeTagGroupErr = new Error(
-      "TIMEOUT occurred while writing Writing Tag Group."
-    );
-
     // Send Each Multi Service Message
     for (let msg of messages) {
       this.write_cip(msg.data);
-
-      // Wait for Controller to Respond
-      const data = await promiseTimeout(
-        new Promise((resolve, reject) => {
-          this.on("Multiple Service Packet", (err, data) => {
-            if (err) reject(err);
-
-            resolve(data);
-          });
-        }),
-        10000,
-        writeTagGroupErr
-      );
-
-      this.removeAllListeners("Multiple Service Packet");
+      const data = await this.consume('Multiple Service Packet');
 
       group.parseWriteMessageRequests(data, msg.tag_ids);
     }

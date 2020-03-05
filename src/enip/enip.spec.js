@@ -1,28 +1,28 @@
-const { ENIP } = require("./index");
+const { ENIP } = require('./index');
 
-describe("ENIP Class", () => {
-  describe("Properties Accessors", () => {
-    it("error", () => {
+describe('ENIP Class', () => {
+  describe('Properties Accessors', () => {
+    it('error', () => {
       const enip = new ENIP();
-      const error = { code: 0x41, msg: "this failed for some reason" };
+      const error = { code: 0x41, msg: 'this failed for some reason' };
       enip.state.error = error;
 
       expect(enip.error).toMatchObject(error);
     });
 
-    it("establising", () => {
+    it('establising', () => {
       const enip = new ENIP();
 
       expect(enip.establishing).toBe(false);
     });
 
-    it("established", () => {
+    it('established', () => {
       const enip = new ENIP();
 
       expect(enip.established).toBe(false);
     });
 
-    it("session_id", () => {
+    it('session_id', () => {
       const enip = new ENIP();
       expect(enip.session_id).toBe(null);
 
@@ -30,7 +30,7 @@ describe("ENIP Class", () => {
       expect(enip.session_id).toBe(23455);
     });
 
-    it("establishing_conn", () => {
+    it('establishing_conn', () => {
       const enip = new ENIP();
       expect(enip.establishing_conn).toBe(false);
 
@@ -41,11 +41,11 @@ describe("ENIP Class", () => {
       expect(enip.state.connection.establishing).toBe(false);
 
       expect(() => {
-        enip.establishing_conn = "establishing";
+        enip.establishing_conn = 'establishing';
       }).toThrow();
     });
 
-    it("established_conn", () => {
+    it('established_conn', () => {
       const enip = new ENIP();
       expect(enip.established_conn).toBe(false);
 
@@ -56,11 +56,11 @@ describe("ENIP Class", () => {
       expect(enip.state.connection.established).toBe(false);
 
       expect(() => {
-        enip.established_conn = "established";
+        enip.established_conn = 'established';
       }).toThrow();
     });
 
-    it("id_conn", () => {
+    it('id_conn', () => {
       const enip = new ENIP();
       expect(enip.id_conn).toBe(null);
 
@@ -71,11 +71,11 @@ describe("ENIP Class", () => {
       expect(enip.state.connection.id).toBe(0x00);
 
       expect(() => {
-        enip.id_conn = "myTestID";
+        enip.id_conn = 'myTestID';
       }).toThrow();
     });
 
-    it("seq_conn", () => {
+    it('seq_conn', () => {
       const enip = new ENIP();
       expect(enip.seq_conn).toBe(0x00);
 
@@ -86,7 +86,7 @@ describe("ENIP Class", () => {
       expect(enip.state.connection.seq_num).toBe(0x02);
 
       expect(() => {
-        enip.seq_conn = "mySeqNo";
+        enip.seq_conn = 'mySeqNo';
       }).toThrow();
     });
   });

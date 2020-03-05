@@ -1,8 +1,8 @@
-const { ENIP, CIP } = require("../enip");
-const dateFormat = require("dateformat");
-const TagGroup = require("../tag-group");
-const { delay, promiseTimeout } = require("../utilities");
-const Queue = require("task-easy");
+const { ENIP, CIP } = require('../enip');
+const dateFormat = require('dateformat');
+const TagGroup = require('../tag-group');
+const { delay, promiseTimeout } = require('../utilities');
+const Queue = require('task-easy');
 
 const compare = (obj1, obj2) => {
   if (obj1.priority > obj2.priority) return true;
@@ -29,18 +29,18 @@ class Controller extends ENIP {
         minorUnrecoverableFault: false,
         majorRecoverableFault: false,
         majorUnrecoverableFault: false,
-        io_faulted: false
+        io_faulted: false,
       },
       subs: new TagGroup(compare),
       scanning: false,
       scan_rate: 200, //ms,
-      connectedMessaging
+      connectedMessaging,
     };
 
     this.workers = {
       read: new Queue(compare, queue_max_size),
       write: new Queue(compare, queue_max_size),
-      group: new Queue(compare, queue_max_size)
+      group: new Queue(compare, queue_max_size),
     };
   }
 
@@ -61,8 +61,8 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   set scan_rate(rate) {
-    if (typeof rate !== "number")
-      throw new Error("scan_rate must be of Type <number>");
+    if (typeof rate !== 'number')
+      throw new Error('scan_rate must be of Type <number>');
     this.state.scan_rate = Math.trunc(rate);
   }
 
@@ -92,8 +92,8 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   set connectedMessaging(conn) {
-    if (typeof conn !== "boolean")
-      throw new Error("connectedMessaging must be of type <boolean>");
+    if (typeof conn !== 'boolean')
+      throw new Error('connectedMessaging must be of type <boolean>');
     this.state.connectedMessaging = conn;
   }
 
@@ -118,7 +118,7 @@ class Controller extends ENIP {
   get time() {
     return dateFormat(
       this.state.controller.time,
-      "mmmm dd, yyyy - hh:MM:ss TT"
+      'mmmm dd, yyyy - hh:MM:ss TT'
     );
   }
   // endregion
@@ -142,7 +142,7 @@ class Controller extends ENIP {
     this.state.controller.path = PORT.build(BACKPLANE, SLOT);
 
     const sessid = await super.connect(IP_ADDR);
-    if (!sessid) throw new Error("Failed to Register Session with Controller");
+    if (!sessid) throw new Error('Failed to Register Session with Controller');
 
     this._initializeControllerEventHandlers(); // Connect sendRRData Event
 
@@ -150,7 +150,7 @@ class Controller extends ENIP {
       const connid = await this.forwardOpen();
       if (!connid)
         throw new Error(
-          "Failed to Establish Forward Open Connection with Controller"
+          'Failed to Establish Forward Open Connection with Controller'
         );
     }
 
@@ -171,14 +171,14 @@ class Controller extends ENIP {
       const closeid = await this.forwardClose();
       if (!closeid)
         throw new Error(
-          "Failed to End Connected EIP Session with Forward Close Request"
+          'Failed to End Connected EIP Session with Forward Close Request'
         );
     }
 
     super.destroy();
 
     this._removeControllerEventHandlers();
-    return "disconnected";
+    return 'disconnected';
   }
 
   /**
@@ -195,7 +195,7 @@ class Controller extends ENIP {
     // Build Connection Manager Object Logical Path Buffer
     const cmPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x06), // Connection Manager Object (0x01)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     // Message Router to Embed in UCMM
@@ -203,10 +203,10 @@ class Controller extends ENIP {
 
     // Create connection parameters
     const params = CIP.ConnectionManager.build_connectionParameters(
-      owner["Exclusive"],
-      connectionType["PointToPoint"],
-      priority["Low"],
-      fixedVar["Variable"],
+      owner['Exclusive'],
+      connectionType['PointToPoint'],
+      priority['Low'],
+      fixedVar['Variable'],
       500
     );
 
@@ -218,7 +218,7 @@ class Controller extends ENIP {
     // Build MR Path in order to send the message to the CPU
     const mrPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x02), // Message Router Object (0x02)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     // Concatenate path to CPU and how to reach the message router
@@ -227,14 +227,14 @@ class Controller extends ENIP {
     // This is the Connection Path data unit (Vol.1 Table 3-5.21)
     const connectionPath = Buffer.concat([
       Buffer.from([Math.ceil(portPath.length / 2)]), //Path size in WORDS
-      portPath
+      portPath,
     ]);
 
     super.establishing_conn = true;
     super.established_conn = false;
 
     // We need to bypass unconnected send for now
-    super.write_cip(Buffer.concat([ MR, forwardOpenData, connectionPath ]));
+    super.write_cip(Buffer.concat([MR, forwardOpenData, connectionPath]));
     const data = await this.consume('Forward Open');
 
     const OTconnID = data.readUInt32LE(0); // first 4 Bytes are O->T connection ID
@@ -255,7 +255,7 @@ class Controller extends ENIP {
     // Build Connection Manager Object Logical Path Buffer
     const cmPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x06), // Connection Manager Object (0x01)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     // Message Router to Embed in UCMM
@@ -266,7 +266,7 @@ class Controller extends ENIP {
     // Build MR Path in order to send the message to the CPU
     const mrPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x02), // Message Router Object (0x02)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     // Concatenate path to CPU and how to reach the message router
@@ -276,10 +276,10 @@ class Controller extends ENIP {
     const connectionPath = Buffer.concat([
       Buffer.from([Math.ceil(portPath.length / 2)]), //Path size in WORDS
       Buffer.from([0x00]), // Padding
-      portPath
+      portPath,
     ]);
 
-    super.write_cip(Buffer.concat([ MR, forwardCloseData, connectionPath ]) );
+    super.write_cip(Buffer.concat([MR, forwardCloseData, connectionPath]));
     const data = await this.consume('Forward Close');
 
     const OTconnID = data.readUInt32LE(0); // first 4 Bytes are O->T connection ID
@@ -329,11 +329,13 @@ class Controller extends ENIP {
     // Build Identity Object Logical Path Buffer
     const identityPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x01), // Identity Object (0x01)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     // Message Router to Embed in UCMM
-    this.write_cip(CIP.MessageRouter.build(GET_ATTRIBUTE_ALL, identityPath, []));
+    this.write_cip(
+      CIP.MessageRouter.build(GET_ATTRIBUTE_ALL, identityPath, [])
+    );
     const data = await this.consume('Get Attribute All');
 
     // Parse Returned Buffer
@@ -342,7 +344,7 @@ class Controller extends ENIP {
     const nameBuf = Buffer.alloc(data.length - 15);
     data.copy(nameBuf, 0, 15);
 
-    this.state.controller.name = nameBuf.toString("utf8");
+    this.state.controller.name = nameBuf.toString('utf8');
 
     const major = data.readUInt8(6);
     const minor = data.readUInt8(7);
@@ -375,9 +377,9 @@ class Controller extends ENIP {
    * @returns {Promise}
    */
   async readWallClock() {
-    if (this.state.controller.name.search("L8") === -1)
+    if (this.state.controller.name.search('L8') === -1)
       throw new Error(
-        "WallClock Utilities are not supported by this controller type"
+        'WallClock Utilities are not supported by this controller type'
       );
 
     const { GET_ATTRIBUTE_SINGLE } = CIP.MessageRouter.services;
@@ -387,10 +389,12 @@ class Controller extends ENIP {
     const identityPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x8b), // WallClock Object (0x8B)
       LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
-      LOGICAL.build(LOGICAL.types.AttributeID, 0x05) // Local Time Attribute ID
+      LOGICAL.build(LOGICAL.types.AttributeID, 0x05), // Local Time Attribute ID
     ]);
 
-    this.write_cip(CIP.MessageRouter.build(GET_ATTRIBUTE_SINGLE, identityPath, []));
+    this.write_cip(
+      CIP.MessageRouter.build(GET_ATTRIBUTE_SINGLE, identityPath, [])
+    );
     const data = await this.consume('Get Attribute Single');
 
     // Parse Returned Buffer
@@ -415,9 +419,9 @@ class Controller extends ENIP {
    * @returns {Promise}
    */
   async writeWallClock(date = new Date()) {
-    if (this.state.controller.name.search("L8") === -1)
+    if (this.state.controller.name.search('L8') === -1)
       throw new Error(
-        "WallClock Utilities are not supported by this controller type"
+        'WallClock Utilities are not supported by this controller type'
       );
 
     const { SET_ATTRIBUTE_SINGLE } = CIP.MessageRouter.services;
@@ -441,10 +445,12 @@ class Controller extends ENIP {
     const identityPath = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x8b), // WallClock Object (0x8B)
       LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
-      LOGICAL.build(LOGICAL.types.AttributeID, 0x05) // Local Time Attribute ID
+      LOGICAL.build(LOGICAL.types.AttributeID, 0x05), // Local Time Attribute ID
     ]);
 
-    this.write_cip(CIP.MessageRouter.build(SET_ATTRIBUTE_SINGLE, identityPath, buf));
+    this.write_cip(
+      CIP.MessageRouter.build(SET_ATTRIBUTE_SINGLE, identityPath, buf)
+    );
     const data = await this.consume('Set Attribute Single');
 
     this.state.controller.time = date;
@@ -461,7 +467,7 @@ class Controller extends ENIP {
   readTag(tag, size = null) {
     return this.workers.read.schedule(this._readTag.bind(this), [tag, size], {
       priority: 1,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -480,7 +486,7 @@ class Controller extends ENIP {
       [tag, value, size],
       {
         priority: 1,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
     );
   }
@@ -495,7 +501,7 @@ class Controller extends ENIP {
   readTagGroup(group) {
     return this.workers.group.schedule(this._readTagGroup.bind(this), [group], {
       priority: 1,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -512,7 +518,7 @@ class Controller extends ENIP {
       [group],
       {
         priority: 1,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
     );
   }
@@ -539,7 +545,7 @@ class Controller extends ENIP {
       await this.workers.group
         .schedule(this._readTagGroup.bind(this), [this.state.subs], {
           priority: 10,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
         .catch(e => {
           if (e.message) {
@@ -552,7 +558,7 @@ class Controller extends ENIP {
       await this.workers.group
         .schedule(this._writeTagGroup.bind(this), [this.state.subs], {
           priority: 10,
-          timestamp: new Date()
+          timestamp: new Date(),
         })
         .catch(e => {
           if (e.message) {
@@ -586,7 +592,7 @@ class Controller extends ENIP {
   }
 
   async getControllerTagList(tagList, program = null) {
-    const getTagListErr = new Error("TIMEOUT occurred while reading tag list");
+    const getTagListErr = new Error('TIMEOUT occurred while reading tag list');
 
     // Wait for Response
     return await promiseTimeout(
@@ -604,8 +610,8 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   _initializeControllerEventHandlers() {
-    this.on("SendRRData Received", this._handleSendRRDataReceived);
-    this.on("SendUnitData Received", this._handleSendUnitDataReceived);
+    this.on('SendRRData Received', this._handleSendRRDataReceived);
+    this.on('SendUnitData Received', this._handleSendUnitDataReceived);
   }
 
   // region Private Methods
@@ -615,8 +621,8 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   _removeControllerEventHandlers() {
-    this.removeAllListeners("SendRRData Received");
-    this.removeAllListeners("SendUnitData Received");
+    this.removeAllListeners('SendRRData Received');
+    this.removeAllListeners('SendUnitData Received');
   }
 
   /**
@@ -645,7 +651,7 @@ class Controller extends ENIP {
    * @memberof Controller
    */
   async _readTagFragmented(tag, size = null) {
-    const typeSize = tag.type === "STRUCT" ? 4 : 2;
+    const typeSize = tag.type === 'STRUCT' ? 4 : 2;
     let retData = Buffer.alloc(0);
     let offset = 0;
 
@@ -664,7 +670,7 @@ class Controller extends ENIP {
         } else {
           return retData;
         }
-      }
+      },
     });
 
     tag.parseReadMessageResponse(data);
@@ -699,7 +705,7 @@ class Controller extends ENIP {
         if (err) throw err;
         tag.unstageWriteRequest();
         return data;
-      }
+      },
     });
   }
 
@@ -734,17 +740,13 @@ class Controller extends ENIP {
             offset,
             maxPacket * totalWrites
           );
-          MR = tag.generateWriteMessageRequestFrag(
-            offset,
-            valueFragment,
-            size
-          );
+          MR = tag.generateWriteMessageRequestFrag(offset, valueFragment, size);
           this.write_cip(MR);
         } else {
           tag.unstageWriteRequest();
           return data;
         }
-      }
+      },
     });
   }
 
@@ -826,7 +828,7 @@ class Controller extends ENIP {
       service,
       generalStatusCode,
       extendedStatus,
-      data
+      data,
     } = CIP.MessageRouter.parse(srrd[1].data);
 
     const {
@@ -842,7 +844,7 @@ class Controller extends ENIP {
       READ_MODIFY_WRITE_TAG,
       MULTIPLE_SERVICE_PACKET,
       FORWARD_OPEN,
-      FORWARD_CLOSE
+      FORWARD_CLOSE,
     } = CIP.MessageRouter.services;
 
     let error =
@@ -852,47 +854,47 @@ class Controller extends ENIP {
     /* eslint-disable indent */
     switch (service - 0x80) {
       case FORWARD_CLOSE:
-        this.emit("Forward Close", error, data);
-        this.emit("Read Modify Write Tag", error, data);
+        this.emit('Forward Close', error, data);
+        this.emit('Read Modify Write Tag', error, data);
         break;
       case FORWARD_OPEN:
-        this.emit("Forward Open", error, data);
+        this.emit('Forward Open', error, data);
         break;
       case GET_INSTANCE_ATTRIBUTE_LIST:
-        this.emit("Get Instance Attribute List", error, data);
+        this.emit('Get Instance Attribute List', error, data);
         break;
       case GET_ATTRIBUTES:
-        this.emit("Get Attributes", error, data);
+        this.emit('Get Attributes', error, data);
         break;
       case GET_ATTRIBUTE_SINGLE:
-        this.emit("Get Attribute Single", error, data);
+        this.emit('Get Attribute Single', error, data);
         break;
       case GET_ATTRIBUTE_ALL:
-        this.emit("Get Attribute All", error, data);
+        this.emit('Get Attribute All', error, data);
         break;
       case SET_ATTRIBUTE_SINGLE:
-        this.emit("Set Attribute Single", error, data);
+        this.emit('Set Attribute Single', error, data);
         break;
       case READ_TAG:
-        this.emit("Read Tag", error, data);
+        this.emit('Read Tag', error, data);
         break;
       case READ_TAG_FRAGMENTED:
-        this.emit("Read Tag Fragmented", error, data);
+        this.emit('Read Tag Fragmented', error, data);
         break;
       case WRITE_TAG:
-        this.emit("Write Tag", error, data);
+        this.emit('Write Tag', error, data);
         break;
       case WRITE_TAG_FRAGMENTED:
-        this.emit("Write Tag Fragmented", error, data);
+        this.emit('Write Tag Fragmented', error, data);
         break;
       case READ_MODIFY_WRITE_TAG:
-        this.emit("Read Modify Write Tag", error, data);
-        this.emit("Forward Close", error, data);
+        this.emit('Read Modify Write Tag', error, data);
+        this.emit('Forward Close', error, data);
         break;
       case MULTIPLE_SERVICE_PACKET: {
         // If service errored then propogate error
         if (error) {
-          this.emit("Multiple Service Packet", error, data);
+          this.emit('Multiple Service Packet', error, data);
           break;
         }
 
@@ -919,7 +921,7 @@ class Controller extends ENIP {
           if (msgData.generalStatusCode !== 0) {
             error = {
               generalStatusCode: msgData.generalStatusCode,
-              extendedStatus: msgData.extendedStatus
+              extendedStatus: msgData.extendedStatus,
             };
           }
 
@@ -937,18 +939,18 @@ class Controller extends ENIP {
         if (msgData.generalStatusCode !== 0) {
           error = {
             generalStatusCode: msgData.generalStatusCode,
-            extendedStatus: msgData.extendedStatus
+            extendedStatus: msgData.extendedStatus,
           };
         }
 
         responses.push(msgData);
 
-        this.emit("Multiple Service Packet", error, responses);
+        this.emit('Multiple Service Packet', error, responses);
         break;
       }
       default:
         this.emit(
-          "Unknown Reply",
+          'Unknown Reply',
           { generalStatusCode: 0x99, extendedStatus: [] },
           data
         );
@@ -963,7 +965,7 @@ class Controller extends ENIP {
       service,
       generalStatusCode,
       extendedStatus,
-      data
+      data,
     } = CIP.MessageRouter.parse(sudnew);
 
     const {
@@ -979,7 +981,7 @@ class Controller extends ENIP {
       READ_MODIFY_WRITE_TAG,
       MULTIPLE_SERVICE_PACKET,
       FORWARD_OPEN,
-      FORWARD_CLOSE
+      FORWARD_CLOSE,
     } = CIP.MessageRouter.services;
 
     let error =
@@ -989,47 +991,47 @@ class Controller extends ENIP {
     /* eslint-disable indent */
     switch (service - 0x80) {
       case FORWARD_CLOSE:
-        this.emit("Forward Close", error, data);
-        this.emit("Read Modify Write Tag", error, data);
+        this.emit('Forward Close', error, data);
+        this.emit('Read Modify Write Tag', error, data);
         break;
       case FORWARD_OPEN:
-        this.emit("Forward Open", error, data);
+        this.emit('Forward Open', error, data);
         break;
       case GET_ATTRIBUTES:
-        this.emit("Get Attributes", error, data);
+        this.emit('Get Attributes', error, data);
         break;
       case GET_ATTRIBUTE_SINGLE:
-        this.emit("Get Attribute Single", error, data);
+        this.emit('Get Attribute Single', error, data);
         break;
       case GET_ATTRIBUTE_ALL:
-        this.emit("Get Attribute All", error, data);
+        this.emit('Get Attribute All', error, data);
         break;
       case SET_ATTRIBUTE_SINGLE:
-        this.emit("Set Attribute Single", error, data);
+        this.emit('Set Attribute Single', error, data);
         break;
       case GET_INSTANCE_ATTRIBUTE_LIST:
-        this.emit("Get Instance Attribute List", error, data);
+        this.emit('Get Instance Attribute List', error, data);
         break;
       case READ_TAG:
-        this.emit("Read Tag", error, data);
+        this.emit('Read Tag', error, data);
         break;
       case READ_TAG_FRAGMENTED:
-        this.emit("Read Tag Fragmented", error, data);
+        this.emit('Read Tag Fragmented', error, data);
         break;
       case WRITE_TAG:
-        this.emit("Write Tag", error, data);
+        this.emit('Write Tag', error, data);
         break;
       case WRITE_TAG_FRAGMENTED:
-        this.emit("Write Tag Fragmented", error, data);
+        this.emit('Write Tag Fragmented', error, data);
         break;
       case READ_MODIFY_WRITE_TAG:
-        this.emit("Read Modify Write Tag", error, data);
-        this.emit("Forward Close", error, data);
+        this.emit('Read Modify Write Tag', error, data);
+        this.emit('Forward Close', error, data);
         break;
       case MULTIPLE_SERVICE_PACKET: {
         // If service errored then propogate error
         if (error) {
-          this.emit("Multiple Service Packet", error, data);
+          this.emit('Multiple Service Packet', error, data);
           break;
         }
 
@@ -1056,7 +1058,7 @@ class Controller extends ENIP {
           if (msgData.generalStatusCode !== 0) {
             error = {
               generalStatusCode: msgData.generalStatusCode,
-              extendedStatus: msgData.extendedStatus
+              extendedStatus: msgData.extendedStatus,
             };
           }
 
@@ -1074,18 +1076,18 @@ class Controller extends ENIP {
         if (msgData.generalStatusCode !== 0) {
           error = {
             generalStatusCode: msgData.generalStatusCode,
-            extendedStatus: msgData.extendedStatus
+            extendedStatus: msgData.extendedStatus,
           };
         }
 
         responses.push(msgData);
 
-        this.emit("Multiple Service Packet", error, responses);
+        this.emit('Multiple Service Packet', error, responses);
         break;
       }
       default:
         this.emit(
-          "Unknown Reply",
+          'Unknown Reply',
           { generalStatusCode: 0x99, extendedStatus: [] },
           data
         );

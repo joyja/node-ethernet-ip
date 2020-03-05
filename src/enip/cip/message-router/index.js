@@ -18,7 +18,7 @@ const services = {
   WRITE_TAG_FRAGMENTED: 0x53,
   READ_MODIFY_WRITE_TAG: 0x4e,
   FORWARD_OPEN: 0x54,
-  FORWARD_CLOSE: 0x4e
+  FORWARD_CLOSE: 0x4e,
 };
 
 /**
@@ -67,7 +67,7 @@ const parse = buf => {
     generalStatusCode: buf.readUInt8(2),
     extendedStatusLength: buf.readUInt8(3),
     extendedStatus: null,
-    data: null
+    data: null,
   };
 
   // Build Extended Status Array

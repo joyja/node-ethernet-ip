@@ -1,8 +1,8 @@
-const { promiseTimeout, delay } = require("./index");
+const { promiseTimeout, delay } = require('./index');
 
-describe("Utilites", () => {
-  describe("Promise Timeout Utility", () => {
-    it("Resolves and Rejects as Expected", async () => {
+describe('Utilites', () => {
+  describe('Promise Timeout Utility', () => {
+    it('Resolves and Rejects as Expected', async () => {
       const fn = (ms, arg) => {
         return promiseTimeout(
           new Promise(resolve => {
@@ -12,24 +12,24 @@ describe("Utilites", () => {
             }, ms);
           }),
           100,
-          "error"
+          'error'
         );
       };
 
-      await expect(fn(200)).rejects.toMatch("error");
-      await expect(fn(110)).rejects.toMatch("error");
+      await expect(fn(200)).rejects.toMatch('error');
+      await expect(fn(110)).rejects.toMatch('error');
       await expect(fn(90)).resolves.toBeUndefined();
       await expect(fn(50)).resolves.toBeUndefined();
-      await expect(fn(50, "hello")).resolves.toBe("hello");
+      await expect(fn(50, 'hello')).resolves.toBe('hello');
       await expect(fn(50, { a: 5, b: 6 })).resolves.toMatchObject({
         a: 5,
-        b: 6
+        b: 6,
       });
     });
   });
 
-  describe("Delay Utility", () => {
-    it("Resolves and Rejects as Expected", async () => {
+  describe('Delay Utility', () => {
+    it('Resolves and Rejects as Expected', async () => {
       const fn = ms => {
         return promiseTimeout(
           new Promise(async resolve => {
@@ -37,12 +37,12 @@ describe("Utilites", () => {
             resolve();
           }),
           100,
-          "error"
+          'error'
         );
       };
 
-      await expect(fn(200)).rejects.toMatch("error");
-      await expect(fn(110)).rejects.toMatch("error");
+      await expect(fn(200)).rejects.toMatch('error');
+      await expect(fn(110)).rejects.toMatch('error');
       await expect(fn(90)).resolves.toBeUndefined();
       await expect(fn(50)).resolves.toBeUndefined();
     });

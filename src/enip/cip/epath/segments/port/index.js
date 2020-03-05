@@ -8,10 +8,10 @@ const PORT_SEGMENT = 0 << 5;
  * @returns {buffer} EPATH Port Segment
  */
 const build = (port, link) => {
-  if (typeof port !== "number" || port <= 0)
-    throw new Error("Port Number must be a Positive Integer");
-  if (!(typeof link === "string" || typeof link === "number") || link < 0)
-    throw new Error("Link Number must be a Positive Integer or String");
+  if (typeof port !== 'number' || port <= 0)
+    throw new Error('Port Number must be a Positive Integer');
+  if (!(typeof link === 'string' || typeof link === 'number') || link < 0)
+    throw new Error('Link Number must be a Positive Integer or String');
 
   let buf = null;
   let portIdentifierByte = PORT_SEGMENT; // Set High Byte of Segement (0x00)
@@ -21,10 +21,10 @@ const build = (port, link) => {
 
   /* eslint-disable indent */
   switch (typeof link) {
-    case "string":
+    case 'string':
       linkBuf = Buffer.from(link);
       break;
-    case "number":
+    case 'number':
       linkBuf = Buffer.from([link]);
       break;
   }

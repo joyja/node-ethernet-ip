@@ -1,10 +1,10 @@
-const { CIP } = require("../../enip");
+const { CIP } = require('../../enip');
 
 class Template {
   constructor() {
     this._attributes = {};
     this._members = [];
-    this._name = "";
+    this._name = '';
   }
 
   _buildGetTemplateAttributesCIP(templateID) {
@@ -17,14 +17,14 @@ class Template {
       0x02,
       0x00,
       0x01,
-      0x00
+      0x00,
     ]); // Attributes 4, 5, 2, 1
 
     const { LOGICAL } = CIP.EPATH.segments;
 
     const path = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x6c),
-      LOGICAL.build(LOGICAL.types.InstanceID, templateID)
+      LOGICAL.build(LOGICAL.types.InstanceID, templateID),
     ]);
 
     return CIP.MessageRouter.build(
@@ -54,7 +54,7 @@ class Template {
       CIP.EPATH.segments.LOGICAL.build(
         LOGICAL.types.InstanceID,
         this._attributes.id
-      )
+      ),
     ]);
 
     let offsetBuf = Buffer.alloc(4);
@@ -82,9 +82,9 @@ class Template {
           ),
           structure: !!(data.readUInt16LE(pointer + 2) & 0x8000),
           reserved: !!(data.readUInt16LE(pointer + 2) & 0x1000),
-          arrayDims: (data.readUInt16LE(pointer + 2) & 0x6000) >> 13
+          arrayDims: (data.readUInt16LE(pointer + 2) & 0x6000) >> 13,
         },
-        offset: data.readUInt32LE(pointer + 4)
+        offset: data.readUInt32LE(pointer + 4),
       });
 
       pointer += 8;
@@ -124,8 +124,8 @@ class Template {
       const cipData = this._buildGetTemplateAttributesCIP(templateID);
       PLC.write_cip(cipData);
 
-      PLC.on("Get Attributes", (error, data) => {
-        PLC.removeAllListeners("Get Attributes");
+      PLC.on('Get Attributes', (error, data) => {
+        PLC.removeAllListeners('Get Attributes');
         if (error) {
           reject(error);
           return;
@@ -150,12 +150,15 @@ class Template {
 
         buf = Buffer.concat([buf, data]);
         if (err && err.generalStatusCode === 6) {
-          const cipData = this._buildGetTemplateCIP(buf.length, reqSize - buf.length);
+          const cipData = this._buildGetTemplateCIP(
+            buf.length,
+            reqSize - buf.length
+          );
           PLC.write_cip(cipData);
         } else {
           return buf;
         }
-      }
+      },
     });
 
     this._parseReadTemplate(buf);

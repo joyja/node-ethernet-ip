@@ -10,7 +10,7 @@
 const promiseTimeout = (
   promise,
   ms,
-  error = new Error("ASYNC Function Call Timed Out!!!")
+  error = new Error('ASYNC Function Call Timed Out!!!')
 ) => {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(error), ms);

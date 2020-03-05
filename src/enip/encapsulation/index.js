@@ -8,7 +8,7 @@ const commands = {
   SendRRData: 0x6f, // Send Unconnected Data Command
   SendUnitData: 0x70, // Send Connnected Data Command
   IndicateStatus: 0x72,
-  Cancel: 0x73
+  Cancel: 0x73,
 };
 
 // region Validation Helper Functions
@@ -20,25 +20,25 @@ const commands = {
  * @returns {string} Human Readable Error Message
  */
 const parseStatus = status => {
-  if (typeof status !== "number")
-    throw new Error("parseStatus accepts type <Number> only!");
+  if (typeof status !== 'number')
+    throw new Error('parseStatus accepts type <Number> only!');
 
   /* eslint-disable indent */
   switch (status) {
     case 0x00:
-      return "SUCCESS";
+      return 'SUCCESS';
     case 0x01:
-      return "FAIL: Sender issued an invalid ecapsulation command.";
+      return 'FAIL: Sender issued an invalid ecapsulation command.';
     case 0x02:
-      return "FAIL: Insufficient memory resources to handle command.";
+      return 'FAIL: Insufficient memory resources to handle command.';
     case 0x03:
-      return "FAIL: Poorly formed or incorrect data in encapsulation packet.";
+      return 'FAIL: Poorly formed or incorrect data in encapsulation packet.';
     case 0x64:
-      return "FAIL: Originator used an invalid session handle.";
+      return 'FAIL: Originator used an invalid session handle.';
     case 0x65:
-      return "FAIL: Target received a message of invalid length.";
+      return 'FAIL: Target received a message of invalid length.';
     case 0x69:
-      return "FAIL: Unsupported encapsulation protocol revision.";
+      return 'FAIL: Unsupported encapsulation protocol revision.';
     default:
       return `FAIL: General failure <${status}> occured.`;
   }
@@ -79,7 +79,7 @@ CPF.ItemIDs = {
   ListServices: 0x100,
   SockaddrO2T: 0x8000,
   SockaddrT2O: 0x8001,
-  SequencedAddrItem: 0x8002
+  SequencedAddrItem: 0x8002,
 };
 
 /**
@@ -110,7 +110,7 @@ CPF.build = dataItems => {
   for (let item of dataItems) {
     const { TypeID, data } = item;
 
-    if (!CPF.isCmd(TypeID)) throw new Error("Invalid CPF Type ID!");
+    if (!CPF.isCmd(TypeID)) throw new Error('Invalid CPF Type ID!');
 
     let buf1 = Buffer.alloc(4);
     let buf2 = Buffer.from(data);
@@ -190,7 +190,7 @@ let header = {};
  */
 header.build = (cmd, session = 0x00, data = []) => {
   // Validate requested command
-  if (!validateCommand(cmd)) throw new Error("Invalid Encapsulation Command!");
+  if (!validateCommand(cmd)) throw new Error('Invalid Encapsulation Command!');
 
   const buf = Buffer.from(data);
   const send = {
@@ -200,7 +200,7 @@ header.build = (cmd, session = 0x00, data = []) => {
     status: 0x00,
     context: Buffer.alloc(8, 0x00),
     options: 0x00,
-    data: buf
+    data: buf,
   };
 
   // Initialize header buffer to appropriate length
@@ -226,7 +226,7 @@ header.build = (cmd, session = 0x00, data = []) => {
  */
 header.parse = buf => {
   if (!Buffer.isBuffer(buf))
-    throw new Error("header.parse accepts type <Buffer> only!");
+    throw new Error('header.parse accepts type <Buffer> only!');
 
   const received = {
     commandCode: buf.readUInt16LE(0),
@@ -236,7 +236,7 @@ header.parse = buf => {
     statusCode: buf.readUInt32LE(8),
     status: null,
     options: buf.readUInt32LE(20),
-    data: null
+    data: null,
   };
 
   // Get Returned Encapsulated Data
@@ -307,7 +307,7 @@ const sendRRData = (session, data, timeout = 10) => {
   // Enclose in Common Packet Format
   let buf = CPF.build([
     { TypeID: CPF.ItemIDs.Null, data: Buffer.from([]) },
-    { TypeID: CPF.ItemIDs.UCMM, data: data }
+    { TypeID: CPF.ItemIDs.UCMM, data: data },
   ]);
 
   // Join Timeout Data with
@@ -343,12 +343,12 @@ const sendUnitData = (session, data, ConnectionID, SequnceNumber) => {
   let buf = CPF.build([
     {
       TypeID: CPF.ItemIDs.ConnectionBased,
-      data: seqAddrBuf
+      data: seqAddrBuf,
     },
     {
       TypeID: CPF.ItemIDs.ConnectedTransportPacket,
-      data: ndata
-    }
+      data: ndata,
+    },
   ]);
 
   // Join Timeout Data with
@@ -368,5 +368,5 @@ module.exports = {
   registerSession,
   unregisterSession,
   sendRRData,
-  sendUnitData
+  sendUnitData,
 };

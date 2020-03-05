@@ -1,8 +1,8 @@
-const { Types, isValidTypeCode, getTypeCodeString } = require("./index");
+const { Types, isValidTypeCode, getTypeCodeString } = require('./index');
 
-describe("CIP Data Types", () => {
-  describe("Data Type Validator", () => {
-    it("Responds Appropriately to Inputs", () => {
+describe('CIP Data Types', () => {
+  describe('Data Type Validator', () => {
+    it('Responds Appropriately to Inputs', () => {
       const fn = num => isValidTypeCode(num);
 
       expect(fn(0xc1)).toBeTruthy();
@@ -14,12 +14,12 @@ describe("CIP Data Types", () => {
       expect(fn(0x01)).toBeFalsy();
       expect(fn(0xe1)).toBeFalsy();
       expect(fn(100)).toBeFalsy();
-      expect(fn("string")).toBeFalsy();
+      expect(fn('string')).toBeFalsy();
     });
   });
 
-  describe("Data Type Retriever", () => {
-    it("Returns Appropriate Data Type", () => {
+  describe('Data Type Retriever', () => {
+    it('Returns Appropriate Data Type', () => {
       const fn = num => getTypeCodeString(num);
 
       for (let type of Object.keys(Types)) {
@@ -27,7 +27,7 @@ describe("CIP Data Types", () => {
       }
 
       expect(fn(0)).toEqual(null);
-      expect(fn("string")).toEqual(null);
+      expect(fn('string')).toEqual(null);
     });
   });
 });

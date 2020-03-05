@@ -1,8 +1,8 @@
-const { CIP } = require("../enip");
+const { CIP } = require('../enip');
 const { MessageRouter } = CIP;
 const { WRITE_TAG, WRITE_TAG_FRAGMENTED } = MessageRouter.services;
-const Tag = require("../tag");
-const Template = require("./template");
+const Tag = require('../tag');
+const Template = require('./template');
 
 class Structure extends Tag {
   constructor(
@@ -27,7 +27,7 @@ class Structure extends Tag {
   }
 
   parseValue(data) {
-    if (this._template._name === "ASCIISTRING82") {
+    if (this._template._name === 'ASCIISTRING82') {
       return data.slice(4, 4 + data.readInt32LE()).toString();
     } else {
       return this._parseReadData(data, this._template);
@@ -38,10 +38,10 @@ class Structure extends Tag {
     if (!this._template) {
       super.value = newValue;
     } else {
-      if (this._template._name === "ASCIISTRING82") {
+      if (this._template._name === 'ASCIISTRING82') {
         const lengthBuf = Buffer.alloc(4);
         lengthBuf.writeUInt32LE(newValue.length);
-        const textBuf = Buffer.from(newValue, "utf8");
+        const textBuf = Buffer.from(newValue, 'utf8');
         const paddBuf = Buffer.alloc(
           this._template._attributes.StructureSize - 4 - newValue.length,
           0x00
@@ -106,7 +106,7 @@ class Structure extends Tag {
       LINT,
       BIT_STRING,
       BOOL,
-      STRUCT
+      STRUCT,
     } = CIP.DataTypes.Types;
 
     template._members.forEach(member => {
@@ -211,7 +211,7 @@ class Structure extends Tag {
         }
         default:
           throw new Error(
-            "Data Type other than SINT, INT, DINT, LINT, BOOL, STRUCT or BIT_STRING returned "
+            'Data Type other than SINT, INT, DINT, LINT, BOOL, STRUCT or BIT_STRING returned '
           );
       }
       /* eslint-enable indent */
@@ -230,7 +230,7 @@ class Structure extends Tag {
       LINT,
       BIT_STRING,
       BOOL,
-      STRUCT
+      STRUCT,
     } = CIP.DataTypes.Types;
 
     template._members.forEach(member => {
@@ -338,7 +338,7 @@ class Structure extends Tag {
         }
         default:
           throw new Error(
-            "Data Type other than SINT, INT, DINT, LINT, BOOL, STRUCT or BIT_STRING returned "
+            'Data Type other than SINT, INT, DINT, LINT, BOOL, STRUCT or BIT_STRING returned '
           );
       }
       /* eslint-enable indent */

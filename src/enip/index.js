@@ -4,7 +4,6 @@ const encapsulation = require('./encapsulation');
 const CIP = require('./cip');
 const { promiseTimeout } = require('../utilities');
 const { lookup } = require('dns');
-const colors = require('colors');
 
 /**
  * Low Level Ethernet/IP

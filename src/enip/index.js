@@ -297,6 +297,8 @@ class ENIP extends Socket {
           this.removeListener(event, listener);
         }
 
+        if (err && !(err instanceof Error)) err = Object.assign(new Error(`ENIP Error`), err);
+
         // Resolve / reject
         (err ? reject(err) : resolve(data))
       }
@@ -314,7 +316,7 @@ class ENIP extends Socket {
         this.on(event, listeners[event]);
       }
 
-      const timer = setTimeout(() => finish(new Error(`consume(${events}) TIMEOUT`)), timeout);
+      const timer = setTimeout(() => finish(new Error(`consume(${events}) timeout`)), timeout);
     });
   }
 

@@ -58,8 +58,9 @@ class Tag extends EventEmitter {
       datatype === Types.BIT_STRING && pathArr[pathArr.length - 1] % 1 === 0;
 
     // Tag can not be both a bit index and BIT_STRING
-    if (isBitString && isBitIndex)
-      throw "Tag cannot be defined as a BIT_STRING and have a bit index";
+    if (isBitString && isBitIndex) {
+      throw new Error("Tag cannot be defined as a BIT_STRING and have a bit index");
+    }
 
     if (isBitString) {
       // BIT_STRING need to be converted to array with bit index

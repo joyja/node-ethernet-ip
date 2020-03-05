@@ -1,10 +1,10 @@
-const MessageRouter = require("../message-router");
-const { LOGICAL } = require("../epath").segments;
+const MessageRouter = require('../message-router');
+const { LOGICAL } = require('../epath').segments;
 
 const UNCONNECTED_SEND_SERVICE = 0x52;
 const UNCONNECTED_SEND_PATH = Buffer.concat([
   LOGICAL.build(LOGICAL.types.ClassID, 0x06),
-  LOGICAL.build(LOGICAL.types.InstanceID, 1)
+  LOGICAL.build(LOGICAL.types.InstanceID, 1),
 ]);
 
 /**
@@ -21,8 +21,8 @@ const UNCONNECTED_SEND_PATH = Buffer.concat([
  * @returns {UCMMSendTimeout}
  */
 const generateEncodedTimeout = timeout => {
-  if (timeout <= 0 || typeof timeout !== "number")
-    throw new Error("Timeouts Must be Positive Integers");
+  if (timeout <= 0 || typeof timeout !== 'number')
+    throw new Error('Timeouts Must be Positive Integers');
 
   let diff = Infinity; // let difference be very large
   let time_tick = 0;
@@ -53,9 +53,9 @@ const generateEncodedTimeout = timeout => {
  */
 const build = (message_request, path, timeout = 2000) => {
   if (!Buffer.isBuffer(message_request))
-    throw new Error("Message Request Must be of Type Buffer");
-  if (!Buffer.isBuffer(path)) throw new Error("Path Must be of Type Buffer");
-  if (typeof timeout !== "number" || timeout < 100) timeout = 1000;
+    throw new Error('Message Request Must be of Type Buffer');
+  if (!Buffer.isBuffer(path)) throw new Error('Path Must be of Type Buffer');
+  if (typeof timeout !== 'number' || timeout < 100) timeout = 1000;
 
   // Get Encoded Timeout
   const encTimeout = generateEncodedTimeout(timeout);
@@ -90,7 +90,7 @@ const build = (message_request, path, timeout = 2000) => {
       nullBuf,
       pathLenBuf,
       nullBuf,
-      path
+      path,
     ]);
   } else {
     buf = Buffer.concat([
@@ -99,7 +99,7 @@ const build = (message_request, path, timeout = 2000) => {
       message_request,
       pathLenBuf,
       nullBuf,
-      path
+      path,
     ]);
   }
 

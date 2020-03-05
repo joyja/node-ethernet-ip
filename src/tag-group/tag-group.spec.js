@@ -1,15 +1,15 @@
-const TagGroup = require("./index");
-const Tag = require("../tag");
-const { Types } = require("../enip/cip/data-types");
+const TagGroup = require('./index');
+const Tag = require('../tag');
+const { Types } = require('../enip/cip/data-types');
 
-describe("Tag Class", () => {
-  describe("Generate Read Requests Method", () => {
-    it("Generates Appropriate Output", () => {
-      const tag1 = new Tag("helloTag1", "prog", Types.DINT);
-      const tag2 = new Tag("helloTag2", "prog", Types.DINT);
-      const tag3 = new Tag("helloTag3", "prog", Types.DINT);
-      const tag4 = new Tag("helloTag4", "prog", Types.DINT);
-      const tag5 = new Tag("helloTag5", "prog", Types.DINT);
+describe('Tag Class', () => {
+  describe('Generate Read Requests Method', () => {
+    it('Generates Appropriate Output', () => {
+      const tag1 = new Tag('helloTag1', 'prog', Types.DINT);
+      const tag2 = new Tag('helloTag2', 'prog', Types.DINT);
+      const tag3 = new Tag('helloTag3', 'prog', Types.DINT);
+      const tag4 = new Tag('helloTag4', 'prog', Types.DINT);
+      const tag5 = new Tag('helloTag5', 'prog', Types.DINT);
 
       const group = new TagGroup();
 
@@ -23,13 +23,13 @@ describe("Tag Class", () => {
     });
   });
 
-  describe("Generate Write Requests Method", () => {
-    it("Generates Appropriate Output", () => {
-      const tag1 = new Tag("helloTag1", "prog", Types.DINT);
-      const tag2 = new Tag("helloTag2", "prog", Types.DINT);
-      const tag3 = new Tag("helloTag3", "prog", Types.DINT);
-      const tag4 = new Tag("helloTag4", "prog", Types.DINT);
-      const tag5 = new Tag("helloTag5", "prog", Types.DINT);
+  describe('Generate Write Requests Method', () => {
+    it('Generates Appropriate Output', () => {
+      const tag1 = new Tag('helloTag1', 'prog', Types.DINT);
+      const tag2 = new Tag('helloTag2', 'prog', Types.DINT);
+      const tag3 = new Tag('helloTag3', 'prog', Types.DINT);
+      const tag4 = new Tag('helloTag4', 'prog', Types.DINT);
+      const tag5 = new Tag('helloTag5', 'prog', Types.DINT);
 
       const group = new TagGroup();
 

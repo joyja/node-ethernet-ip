@@ -1,22 +1,22 @@
-const encapsulation = require("./index");
+const encapsulation = require('./index');
 
-describe("Encapsulation", () => {
-  describe("Command Validator", () => {
+describe('Encapsulation', () => {
+  describe('Command Validator', () => {
     const { validateCommand } = encapsulation;
     const {
       RegisterSession,
       UnregisterSession,
       SendRRData,
-      SendUnitData
+      SendUnitData,
     } = encapsulation.commands;
 
-    it("Rejects Invalid Commands", () => {
+    it('Rejects Invalid Commands', () => {
       expect(validateCommand(0x99)).toBeFalsy();
-      expect(validateCommand("hello")).toBeFalsy();
+      expect(validateCommand('hello')).toBeFalsy();
       expect(validateCommand(0x02)).toBeFalsy();
     });
 
-    it("Accepts Proper Commands", () => {
+    it('Accepts Proper Commands', () => {
       expect(validateCommand(0x66)).toBeTruthy();
       expect(validateCommand(102)).toBeTruthy();
       expect(validateCommand(RegisterSession)).toBeTruthy();
@@ -26,42 +26,42 @@ describe("Encapsulation", () => {
     });
   });
 
-  describe("Status Parser", () => {
+  describe('Status Parser', () => {
     const { parseStatus } = encapsulation;
 
-    it("Rejects Non-Number Inputs", () => {
-      expect(() => parseStatus("test")).toThrow();
+    it('Rejects Non-Number Inputs', () => {
+      expect(() => parseStatus('test')).toThrow();
       expect(() => parseStatus(null)).toThrow();
       expect(() => parseStatus(undefined)).toThrow();
     });
 
-    it("Returns Proper Human Readable String", () => {
-      expect(parseStatus(0)).toEqual("SUCCESS");
-      expect(parseStatus(0x01)).toEqual(expect.stringContaining("FAIL"));
-      expect(parseStatus(1)).toEqual(expect.stringContaining("FAIL"));
-      expect(parseStatus(0x45)).toEqual(expect.stringContaining("FAIL"));
+    it('Returns Proper Human Readable String', () => {
+      expect(parseStatus(0)).toEqual('SUCCESS');
+      expect(parseStatus(0x01)).toEqual(expect.stringContaining('FAIL'));
+      expect(parseStatus(1)).toEqual(expect.stringContaining('FAIL'));
+      expect(parseStatus(0x45)).toEqual(expect.stringContaining('FAIL'));
     });
   });
 
-  describe("Header Building Utility", () => {
+  describe('Header Building Utility', () => {
     const {
       header: { build },
-      commands: { RegisterSession }
+      commands: { RegisterSession },
     } = encapsulation;
 
-    it("Builds Correct Encapsulation Buffer", () => {
+    it('Builds Correct Encapsulation Buffer', () => {
       const snap = build(RegisterSession, 0x00, [0x01, 0x00, 0x00, 0x00]);
       expect(snap).toMatchSnapshot();
     });
   });
 
-  describe("Header Parsing Utility", () => {
+  describe('Header Parsing Utility', () => {
     const {
       header: { parse, build },
-      commands: { SendRRData }
+      commands: { SendRRData },
     } = encapsulation;
 
-    it("Builds Correct Encapsulation Buffer", () => {
+    it('Builds Correct Encapsulation Buffer', () => {
       const data = build(SendRRData, 98705, [0x01, 0x00, 0x00, 0x00]);
       const snap = parse(data);
 
@@ -69,45 +69,45 @@ describe("Encapsulation", () => {
     });
   });
 
-  describe("Test Encapsulation Generator Functions", () => {
+  describe('Test Encapsulation Generator Functions', () => {
     const {
       registerSession,
       unregisterSession,
       sendRRData,
-      sendUnitData
+      sendUnitData,
     } = encapsulation;
 
-    it("Register Session Returns Correct Encapsulation String", () => {
+    it('Register Session Returns Correct Encapsulation String', () => {
       const data = registerSession();
 
       expect(data).toMatchSnapshot();
     });
 
-    it("Unregister Session Returns Correct Encapsulation String", () => {
+    it('Unregister Session Returns Correct Encapsulation String', () => {
       const data = unregisterSession(98705);
 
       expect(data).toMatchSnapshot();
     });
 
-    it("SendRRData Returns Correct Encapsulation String", () => {
-      const data = sendRRData(98705, Buffer.from("hello world"));
+    it('SendRRData Returns Correct Encapsulation String', () => {
+      const data = sendRRData(98705, Buffer.from('hello world'));
 
       expect(data).toMatchSnapshot();
     });
 
-    it("SendUnitData Returns Correct Encapsulation String", () => {
-      const data = sendUnitData(98705, Buffer.from("hello world"), 32145, 456);
+    it('SendUnitData Returns Correct Encapsulation String', () => {
+      const data = sendUnitData(98705, Buffer.from('hello world'), 32145, 456);
 
       expect(data).toMatchSnapshot();
     });
   });
 
-  describe("Test Common Packet Format Helper Functions", () => {
+  describe('Test Common Packet Format Helper Functions', () => {
     const {
-      CPF: { parse, build, isCmd, ItemIDs }
+      CPF: { parse, build, isCmd, ItemIDs },
     } = encapsulation;
 
-    it("Invalid CPF Commands causes an Error to be Thrown", () => {
+    it('Invalid CPF Commands causes an Error to be Thrown', () => {
       const { Null, ListIdentity, ConnectionBased, UCMM } = ItemIDs;
 
       expect(isCmd(Null)).toBeTruthy();
@@ -120,32 +120,32 @@ describe("Encapsulation", () => {
       expect(isCmd(0xc1)).toBeFalsy();
     });
 
-    it("Build Helper Function Generates Correct Output", () => {
+    it('Build Helper Function Generates Correct Output', () => {
       const test1 = [
         { TypeID: ItemIDs.Null, data: [] },
-        { TypeID: ItemIDs.UCMM, data: "hello world" }
+        { TypeID: ItemIDs.UCMM, data: 'hello world' },
       ];
 
       const test2 = [
         { TypeID: ItemIDs.Null, data: [] },
-        { TypeID: ItemIDs.UCMM, data: "hello world" },
-        { TypeID: ItemIDs.ConnectionBased, data: "This is a test" }
+        { TypeID: ItemIDs.UCMM, data: 'hello world' },
+        { TypeID: ItemIDs.ConnectionBased, data: 'This is a test' },
       ];
 
       expect(build(test1)).toMatchSnapshot();
       expect(build(test2)).toMatchSnapshot();
     });
 
-    it("Parse Helper Function Generates Correct Output", () => {
+    it('Parse Helper Function Generates Correct Output', () => {
       const test1 = build([
         { TypeID: ItemIDs.Null, data: [] },
-        { TypeID: ItemIDs.UCMM, data: "hello world" }
+        { TypeID: ItemIDs.UCMM, data: 'hello world' },
       ]);
 
       const test2 = build([
         { TypeID: ItemIDs.Null, data: [] },
-        { TypeID: ItemIDs.UCMM, data: "hello world" },
-        { TypeID: ItemIDs.ConnectionBased, data: "This is a test" }
+        { TypeID: ItemIDs.UCMM, data: 'hello world' },
+        { TypeID: ItemIDs.ConnectionBased, data: 'This is a test' },
       ]);
 
       expect(parse(test1)).toMatchSnapshot();

@@ -1,5 +1,5 @@
-const { CIP } = require("../enip");
-const { EventEmitter } = require("events");
+const { CIP } = require('../enip');
+const { EventEmitter } = require('events');
 const { LOGICAL } = CIP.EPATH.segments;
 const { MessageRouter } = CIP;
 const { MULTIPLE_SERVICE_PACKET } = MessageRouter.services;
@@ -10,13 +10,13 @@ class TagGroup extends EventEmitter {
 
     const pathBuf = Buffer.concat([
       LOGICAL.build(LOGICAL.types.ClassID, 0x02), // Message Router Class ID (0x02)
-      LOGICAL.build(LOGICAL.types.InstanceID, 0x01) // Instance ID (0x01)
+      LOGICAL.build(LOGICAL.types.InstanceID, 0x01), // Instance ID (0x01)
     ]);
 
     this.state = {
       tags: {},
       path: pathBuf,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 

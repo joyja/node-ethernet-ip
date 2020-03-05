@@ -7,7 +7,7 @@ const types = {
   ConnPoint: 3 << 2,
   AttributeID: 4 << 2,
   Special: 5 << 2,
-  ServiceID: 6 << 2
+  ServiceID: 6 << 2,
 };
 
 /**
@@ -33,10 +33,10 @@ const validateLogicalType = type => {
  */
 const build = (type, address, padded = true) => {
   if (!validateLogicalType(type))
-    throw new Error("Invalid Logical Type Code Passed to Segment Builder");
+    throw new Error('Invalid Logical Type Code Passed to Segment Builder');
 
-  if (typeof address !== "number" || address <= 0)
-    throw new Error("Passed Address Must be a Positive Integer");
+  if (typeof address !== 'number' || address <= 0)
+    throw new Error('Passed Address Must be a Positive Integer');
 
   let buf = null; // Initialize Output Buffer
 

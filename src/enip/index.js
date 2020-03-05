@@ -1,9 +1,9 @@
-const { Socket, isIPv4 } = require("net");
-const { EIP_PORT } = require("../config");
-const encapsulation = require("./encapsulation");
-const CIP = require("./cip");
-const { promiseTimeout } = require("../utilities");
-const { lookup } = require("dns");
+const { Socket, isIPv4 } = require('net');
+const { EIP_PORT } = require('../config');
+const encapsulation = require('./encapsulation');
+const CIP = require('./cip');
+const { promiseTimeout } = require('../utilities');
+const { lookup } = require('dns');
 
 /**
  * Low Level Ethernet/IP
@@ -28,9 +28,9 @@ class ENIP extends Socket {
         id: null,
         establishing: false,
         established: false,
-        seq_num: 0
+        seq_num: 0,
       },
-      error: { code: null, msg: null }
+      error: { code: null, msg: null },
     };
 
     // Initialize Event Handlers for Underlying Socket Class
@@ -85,36 +85,36 @@ class ENIP extends Socket {
    * @memberof ENIP
    */
   set establishing_conn(newEstablish) {
-    if (typeof newEstablish !== "boolean") {
+    if (typeof newEstablish !== 'boolean') {
       throw new Error(
-        "Wrong type passed when setting connection: establishing parameter"
+        'Wrong type passed when setting connection: establishing parameter'
       );
     }
     this.state.connection.establishing = newEstablish;
   }
 
   set established_conn(newEstablished) {
-    if (typeof newEstablished !== "boolean") {
+    if (typeof newEstablished !== 'boolean') {
       throw new Error(
-        "Wrong type passed when setting connection: established parameter"
+        'Wrong type passed when setting connection: established parameter'
       );
     }
     this.state.connection.established = newEstablished;
   }
 
   set id_conn(newID) {
-    if (typeof newID !== "number") {
+    if (typeof newID !== 'number') {
       throw new Error(
-        "Wrong type passed when setting connection: id parameter"
+        'Wrong type passed when setting connection: id parameter'
       );
     }
     this.state.connection.id = newID;
   }
 
   set seq_conn(newSeq) {
-    if (typeof newSeq !== "number") {
+    if (typeof newSeq !== 'number') {
       throw new Error(
-        "Wrong type passed when setting connection: seq_numparameter"
+        'Wrong type passed when setting connection: seq_numparameter'
       );
     }
     this.state.connection.seq_num = newSeq;
@@ -155,15 +155,15 @@ class ENIP extends Socket {
    */
   async connect(IP_ADDR) {
     if (!IP_ADDR) {
-      throw new Error("Controller <class> requires IP_ADDR <string>!!!");
+      throw new Error('Controller <class> requires IP_ADDR <string>!!!');
     }
     await new Promise((resolve, reject) => {
       lookup(IP_ADDR, (err, addr) => {
-        if (err) reject(new Error("DNS Lookup failed for IP_ADDR " + IP_ADDR));
+        if (err) reject(new Error('DNS Lookup failed for IP_ADDR ' + IP_ADDR));
 
         if (!isIPv4(addr)) {
           reject(
-            new Error("Invalid IP_ADDR <string> passed to Controller <class>")
+            new Error('Invalid IP_ADDR <string> passed to Controller <class>')
           );
         }
         resolve();
@@ -176,7 +176,7 @@ class ENIP extends Socket {
     this.state.TCP.establishing = true;
 
     const connectErr = new Error(
-      "TIMEOUT occurred while attempting to establish TCP connection with Controller."
+      'TIMEOUT occurred while attempting to establish TCP connection with Controller.'
     );
 
     // Connect to Controller and Then Send Register Session Packet
@@ -195,19 +195,19 @@ class ENIP extends Socket {
     );
 
     const sessionErr = new Error(
-      "TIMEOUT occurred while attempting to establish Ethernet/IP session with Controller."
+      'TIMEOUT occurred while attempting to establish Ethernet/IP session with Controller.'
     );
 
     // Wait for Session to be Registered
     const sessid = await promiseTimeout(
       new Promise(resolve => {
-        this.on("Session Registered", sessid => {
+        this.on('Session Registered', sessid => {
           resolve(sessid);
         });
 
-        this.on("Session Registration Failed", error => {
+        this.on('Session Registration Failed', error => {
           this.state.error.code = error;
-          this.state.error.msg = "Failed to Register Session";
+          this.state.error.msg = 'Failed to Register Session';
           resolve(null);
         });
       }),
@@ -216,8 +216,8 @@ class ENIP extends Socket {
     );
 
     // Clean Up Local Listeners
-    this.removeAllListeners("Session Registered");
-    this.removeAllListeners("Session Registration Failed");
+    this.removeAllListeners('Session Registered');
+    this.removeAllListeners('Session Registration Failed');
 
     // Return Session ID
     return sessid;
@@ -248,7 +248,7 @@ class ENIP extends Socket {
           if (connection.seq_num > 0xffff) connection.seq_num = 0;
         } else {
           throw new Error(
-            "Connected message request, but no connection established. Forgot forwardOpen?"
+            'Connected message request, but no connection established. Forgot forwardOpen?'
           );
         }
       }
@@ -282,8 +282,8 @@ class ENIP extends Socket {
 
   // region Private Method Definitions
   _initializeEventHandlers() {
-    this.on("data", this._handleDataEvent);
-    this.on("close", this._handleCloseEvent);
+    this.on('data', this._handleDataEvent);
+    this.on('close', this._handleCloseEvent);
   }
   //endregion
 
@@ -321,7 +321,7 @@ class ENIP extends Socket {
       this.state.error.code = statusCode;
       this.state.error.msg = status;
 
-      this.emit("Session Registration Failed", this.state.error);
+      this.emit('Session Registration Failed', this.state.error);
     } else {
       this.state.error.code = null;
       this.state.error.msg = null;
@@ -331,12 +331,12 @@ class ENIP extends Socket {
           this.state.session.establishing = false;
           this.state.session.established = true;
           this.state.session.id = encapsulatedData.session;
-          this.emit("Session Registered", this.state.session.id);
+          this.emit('Session Registered', this.state.session.id);
           break;
 
         case commands.UnregisterSession:
           this.state.session.established = false;
-          this.emit("Session Unregistered");
+          this.emit('Session Unregistered');
           break;
 
         case commands.SendRRData: {
@@ -344,7 +344,7 @@ class ENIP extends Socket {
           encapsulatedData.data.copy(buf1, 0, 6);
 
           const srrd = CPF.parse(buf1);
-          this.emit("SendRRData Received", srrd);
+          this.emit('SendRRData Received', srrd);
           break;
         }
         case commands.SendUnitData: {
@@ -352,12 +352,12 @@ class ENIP extends Socket {
           encapsulatedData.data.copy(buf2, 0, 6);
 
           const sud = CPF.parse(buf2);
-          this.emit("SendUnitData Received", sud);
+          this.emit('SendUnitData Received', sud);
           break;
         }
         default:
           this.emit(
-            "Unhandled Encapsulated Command Received",
+            'Unhandled Encapsulated Command Received',
             encapsulatedData
           );
       }
@@ -374,7 +374,7 @@ class ENIP extends Socket {
   _handleCloseEvent(hadError) {
     this.state.session.established = false;
     this.state.TCP.established = false;
-    if (hadError) throw new Error("Socket Transmission Failure Occurred!");
+    if (hadError) throw new Error('Socket Transmission Failure Occurred!');
   }
   // endregion
 }

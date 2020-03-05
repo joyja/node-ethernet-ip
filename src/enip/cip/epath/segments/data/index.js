@@ -1,12 +1,12 @@
 const Types = {
   Simple: 0x80,
-  ANSI_EXTD: 0x91
+  ANSI_EXTD: 0x91,
 };
 
 const ElementTypes = {
   UINT8: 0x28,
   UINT16: 0x29,
-  UINT32: 0x2a
+  UINT32: 0x2a,
 };
 
 /**
@@ -17,8 +17,8 @@ const ElementTypes = {
  * @returns {buffer}
  */
 const build = (data, ANSI = true) => {
-  if (!(typeof data === "string" || Buffer.isBuffer(data)))
-    throw new Error("Data Segment Data Must be a String or Buffer");
+  if (!(typeof data === 'string' || Buffer.isBuffer(data)))
+    throw new Error('Data Segment Data Must be a String or Buffer');
 
   // Build Element Segment If Int
   if (data % 1 === 0) return elementBuild(parseInt(data));

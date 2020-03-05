@@ -3,7 +3,7 @@
  */
 const owner = {
   Exclusive: 0,
-  Multiple: 1
+  Multiple: 1,
 };
 
 /**
@@ -13,7 +13,7 @@ const connectionType = {
   Null: 0,
   Multicast: 1,
   PointToPoint: 2,
-  Reserved: 3
+  Reserved: 3,
 };
 
 /**
@@ -23,7 +23,7 @@ const priority = {
   Low: 0,
   High: 1,
   Scheduled: 2,
-  Urgent: 3
+  Urgent: 3,
 };
 
 /**
@@ -31,7 +31,7 @@ const priority = {
  */
 const fixedVar = {
   Fixed: 0,
-  Variable: 1
+  Variable: 1,
 };
 
 /**
@@ -39,19 +39,19 @@ const fixedVar = {
  */
 const build_connectionParameters = (owner, type, priority, fixedVar, size) => {
   if (owner != 0 && owner != 1)
-    throw new Error("Owner can only be exclusive (0) or multiple (1)");
+    throw new Error('Owner can only be exclusive (0) or multiple (1)');
   if (type > 3 || type < 0)
     throw new Error(
-      "Type can only be Null(0), Multicast(1), PointToPoint(2) or Reserved(3)"
+      'Type can only be Null(0), Multicast(1), PointToPoint(2) or Reserved(3)'
     );
   if (priority > 3 || priority < 0)
     throw new Error(
-      "Priority can only be Low(0), High(1), Scheduled(2) or Urgent(3)"
+      'Priority can only be Low(0), High(1), Scheduled(2) or Urgent(3)'
     );
   if (fixedVar != 0 && fixedVar != 1)
-    throw new Error("Fixedvar can only be Fixed(0) or VariableI(1)");
-  if (size > 10000 || size <= 1 || typeof size !== "number")
-    throw new Error("Size must be a positive number between 1 and 10000");
+    throw new Error('Fixedvar can only be Fixed(0) or VariableI(1)');
+  if (size > 10000 || size <= 1 || typeof size !== 'number')
+    throw new Error('Size must be a positive number between 1 and 10000');
 
   return (
     (owner << 15) | (type << 13) | (priority << 10) | (fixedVar << 9) | size
@@ -62,7 +62,7 @@ const build_connectionParameters = (owner, type, priority, fixedVar, size) => {
  * lookup table for Time Tick Value (Vol.1 - Table 3-5.11)
  */
 const timePerTick = {
-  1: 0
+  1: 0,
 };
 
 const connSerial = 0x1337;
@@ -78,7 +78,7 @@ const timeOutMultiplier = {
   64: 4,
   128: 5,
   256: 6,
-  512: 7
+  512: 7,
 };
 
 /**
@@ -95,8 +95,8 @@ const timeOutMultiplier = {
  * @returns {UCMMSendTimeout}
  */
 const generateEncodedTimeout = timeout => {
-  if (timeout <= 0 || typeof timeout !== "number")
-    throw new Error("Timeouts Must be Positive Integers");
+  if (timeout <= 0 || typeof timeout !== 'number')
+    throw new Error('Timeouts Must be Positive Integers');
 
   let diff = Infinity; // let difference be very large
   let time_tick = 0;
@@ -132,15 +132,15 @@ const build_forwardOpen = (
   timeOutMs = 1000,
   timeOutMult = 32
 ) => {
-  if (timeOutMs <= 900 || typeof timeOutMs !== "number")
-    throw new Error("Timeouts Must be Positive Integers and above 500");
-  if (!(timeOutMult in timeOutMultiplier) || typeof timeOutMult !== "number")
-    throw new Error("Timeout Multiplier must be a number and a multiple of 4");
-  if (otRPI <= 8000 || typeof otRPI !== "number")
-    throw new Error("otRPI should be at least 8000 (8ms)");
-  if (typeof netConnParams !== "number")
+  if (timeOutMs <= 900 || typeof timeOutMs !== 'number')
+    throw new Error('Timeouts Must be Positive Integers and above 500');
+  if (!(timeOutMult in timeOutMultiplier) || typeof timeOutMult !== 'number')
+    throw new Error('Timeout Multiplier must be a number and a multiple of 4');
+  if (otRPI <= 8000 || typeof otRPI !== 'number')
+    throw new Error('otRPI should be at least 8000 (8ms)');
+  if (typeof netConnParams !== 'number')
     throw new Error(
-      "ConnectionParams should be created by the builder and result in a number!"
+      'ConnectionParams should be created by the builder and result in a number!'
     );
 
   const actualMultiplier = timeOutMultiplier[timeOutMult];
@@ -189,12 +189,12 @@ const build_forwardClose = (
   vendorOrig = 0x3333,
   serialOrig = 0x1337
 ) => {
-  if (timeOutMs <= 900 || typeof timeOutMs !== "number")
-    throw new Error("Timeouts Must be Positive Integers and at least 500");
-  if (vendorOrig <= 0 || typeof vendorOrig !== "number")
-    throw new Error("VendorOrig Must be Positive Integers");
-  if (serialOrig <= 0 || typeof serialOrig !== "number")
-    throw new Error("SerialOrig Must be Positive Integers");
+  if (timeOutMs <= 900 || typeof timeOutMs !== 'number')
+    throw new Error('Timeouts Must be Positive Integers and at least 500');
+  if (vendorOrig <= 0 || typeof vendorOrig !== 'number')
+    throw new Error('VendorOrig Must be Positive Integers');
+  if (serialOrig <= 0 || typeof serialOrig !== 'number')
+    throw new Error('SerialOrig Must be Positive Integers');
 
   const connectionParams = Buffer.alloc(10);
   const timeout = generateEncodedTimeout(timeOutMs);
@@ -222,5 +222,5 @@ module.exports = {
   priority,
   owner,
   connectionType,
-  fixedVar
+  fixedVar,
 };

@@ -1,5 +1,5 @@
-const { CIP } = require("../enip");
-const { Template } = require("../structure");
+const { CIP } = require('../enip');
+const { Template } = require('../structure');
 
 class TagList {
   constructor() {
@@ -20,7 +20,7 @@ class TagList {
     let pathArray = [];
 
     if (program) {
-      pathArray.push(DATA.build("Program:" + program));
+      pathArray.push(DATA.build('Program:' + program));
     }
 
     pathArray.push(LOGICAL.build(LOGICAL.types.ClassID, 0x6b)); //Symbol Class ID
@@ -73,7 +73,7 @@ class TagList {
         id: instanceID,
         name: tagName,
         type: this._parseTagType(tagType),
-        program: program
+        program: program,
       };
 
       if (lastTag !== -1) {
@@ -114,7 +114,7 @@ class TagList {
       typeName: null,
       structure: structure,
       arrayDims: arrayDims,
-      reserved: reserved
+      reserved: reserved,
     };
   }
 
@@ -135,8 +135,8 @@ class TagList {
         PLC.write_cip(cipData); // Write CIP data to PLC
 
         // Response Handler
-        PLC.on("Get Instance Attribute List", async (err, data) => {
-          PLC.removeAllListeners("Get Instance Attribute List"); // Make sure we don't handle future calls in this instance
+        PLC.on('Get Instance Attribute List', async (err, data) => {
+          PLC.removeAllListeners('Get Instance Attribute List'); // Make sure we don't handle future calls in this instance
 
           // Check For actual error (Skip too much data)
           if (err && err.generalStatusCode !== 6) {
@@ -179,7 +179,7 @@ class TagList {
    */
   get programs() {
     return this.tags
-      .filter(tag => tag.name.slice(0, 8) === "Program:")
+      .filter(tag => tag.name.slice(0, 8) === 'Program:')
       .map(tag => {
         return tag.name.slice(8, tag.length);
       });
@@ -192,7 +192,7 @@ class TagList {
   }
 
   getTemplateByTag(tagName, program = null) {
-    const tagArray = tagName.split(".");
+    const tagArray = tagName.split('.');
     const tag = this.tags.find(
       tag => tag.name === tagArray[0] && tag.program === program
     );

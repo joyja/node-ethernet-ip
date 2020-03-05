@@ -1,19 +1,19 @@
-const { EventEmitter } = require("events");
-const crypto = require("crypto");
-const { CIP } = require("../enip");
+const { EventEmitter } = require('events');
+const crypto = require('crypto');
+const { CIP } = require('../enip');
 const { MessageRouter } = CIP;
 const {
   READ_TAG,
   WRITE_TAG,
   READ_MODIFY_WRITE_TAG,
-  READ_TAG_FRAGMENTED
+  READ_TAG_FRAGMENTED,
 } = MessageRouter.services;
 const {
   Types,
   getTypeCodeString,
-  isValidTypeCode
-} = require("../enip/cip/data-types");
-const dateFormat = require("dateformat");
+  isValidTypeCode,
+} = require('../enip/cip/data-types');
+const dateFormat = require('dateformat');
 
 // Static Class Property - Tracks Instances
 let instances = 0;
@@ -22,10 +22,10 @@ class Tag extends EventEmitter {
     super();
 
     if (!Tag.isValidTagname(tagname))
-      throw new Error("Tagname Must be of Type <string>");
+      throw new Error('Tagname Must be of Type <string>');
     if (!isValidTypeCode(datatype) && datatype !== null)
-      throw new Error("Datatype must be a Valid Type Code <number>");
-    if (typeof keepAlive !== "number")
+      throw new Error('Datatype must be a Valid Type Code <number>');
+    if (typeof keepAlive !== 'number')
       throw new Error(
         `Tag expected keepAlive of type <number> instead got type <${typeof keepAlive}>`
       );
@@ -49,7 +49,7 @@ class Tag extends EventEmitter {
 
     // Check for bit index (tag ends in .int) - this only applies to SINT, INT, DINT or array elements of
     // Split by "." to only check udt members and bit index.
-    let memArr = tagname.split(".");
+    let memArr = tagname.split('.');
     let isBitIndex =
       (memArr.length > 1) & (memArr[memArr.length - 1] % 1 === 0);
 
@@ -59,7 +59,7 @@ class Tag extends EventEmitter {
 
     // Tag can not be both a bit index and BIT_STRING
     if (isBitString && isBitIndex)
-      throw "Tag cannot be defined as a BIT_STRING and have a bit index";
+      throw 'Tag cannot be defined as a BIT_STRING and have a bit index';
 
     if (isBitString) {
       // BIT_STRING need to be converted to array with bit index
@@ -110,13 +110,13 @@ class Tag extends EventEmitter {
         controllerValue: null,
         path: pathBuf,
         program: program,
-        stage_write: false
+        stage_write: false,
       },
       read_size: 0x01,
       error: { code: null, status: null },
       timestamp: new Date(),
       instance: hash(instanceBuf),
-      keepAlive: keepAlive
+      keepAlive: keepAlive,
     };
   }
 
@@ -169,7 +169,7 @@ class Tag extends EventEmitter {
    */
   set name(name) {
     if (!Tag.isValidTagname(name))
-      throw new Error("Tagname Must be of Type <string>");
+      throw new Error('Tagname Must be of Type <string>');
     this.state.tag.name = name;
   }
 
@@ -202,7 +202,7 @@ class Tag extends EventEmitter {
    */
   set type(type) {
     if (!isValidTypeCode(type))
-      throw new Error("Datatype must be a Valid Type Code <number>");
+      throw new Error('Datatype must be a Valid Type Code <number>');
     this.state.tag.type = type;
   }
 
@@ -223,8 +223,8 @@ class Tag extends EventEmitter {
    * @property {number} read size
    */
   set read_size(size) {
-    if (typeof type !== "number")
-      throw new Error("Read Size must be a Valid Type Code <number>");
+    if (typeof type !== 'number')
+      throw new Error('Read Size must be a Valid Type Code <number>');
     this.state.read_size = size;
   }
 
@@ -275,8 +275,8 @@ class Tag extends EventEmitter {
 
       this.state.timestamp = new Date();
 
-      if (lastValue !== null) this.emit("Changed", this, lastValue);
-      else this.emit("Initialized", this);
+      if (lastValue !== null) this.emit('Changed', this, lastValue);
+      else this.emit('Initialized', this);
     } else {
       if (this.state.keepAlive > 0) {
         const now = new Date();
@@ -287,7 +287,7 @@ class Tag extends EventEmitter {
           if (!stage_write) this.state.tag.value = newValue;
           this.state.timestamp = now;
 
-          this.emit("KeepAlive", this);
+          this.emit('KeepAlive', this);
         }
       }
     }
@@ -311,7 +311,7 @@ class Tag extends EventEmitter {
    * @returns {string}
    */
   get timestamp() {
-    return dateFormat(this.state.timestamp, "mm/dd/yyyy-HH:MM:ss.l");
+    return dateFormat(this.state.timestamp, 'mm/dd/yyyy-HH:MM:ss.l');
   }
 
   /**
@@ -449,7 +449,7 @@ class Tag extends EventEmitter {
         break;
       default:
         throw new Error(
-          "Data Type other than SINT, INT, DINT, or BIT_STRING returned when a Bit Index was requested"
+          'Data Type other than SINT, INT, DINT, or BIT_STRING returned when a Bit Index was requested'
         );
     }
     /* eslint-enable indent */
@@ -483,9 +483,9 @@ class Tag extends EventEmitter {
         this.controller_value = data.readUInt8(2) !== 0;
         break;
       case LINT:
-        if (typeof data.writeBigInt64LE !== "function") {
+        if (typeof data.writeBigInt64LE !== 'function') {
           throw new Error(
-            "This version of Node.js does not support big integers. Upgrade to >= 12.0.0"
+            'This version of Node.js does not support big integers. Upgrade to >= 12.0.0'
           );
         }
         this.controller_value = data.readBigInt64LE(2);
@@ -559,7 +559,7 @@ class Tag extends EventEmitter {
         break;
       default:
         throw new Error(
-          "Bit Indexes can only be used on SINT, INT, DINT, or BIT_STRING data types."
+          'Bit Indexes can only be used on SINT, INT, DINT, or BIT_STRING data types.'
         );
     }
 
@@ -619,9 +619,9 @@ class Tag extends EventEmitter {
         break;
       case LINT:
         valBuf = Buffer.alloc(8);
-        if (typeof valBuf.writeBigInt64LE !== "function") {
+        if (typeof valBuf.writeBigInt64LE !== 'function') {
           throw new Error(
-            "This version of Node.js does not support big integers. Upgrade to >= 12.0.0"
+            'This version of Node.js does not support big integers. Upgrade to >= 12.0.0'
           );
         }
         valBuf.writeBigInt64LE(tag.value);
@@ -661,46 +661,46 @@ class Tag extends EventEmitter {
    * @memberof Tag
    */
   static isValidTagname(tagname) {
-    if (typeof tagname !== "string") return false;
+    if (typeof tagname !== 'string') return false;
 
     // regex components
     const nameRegex = captureIndex => {
       return `(_?[a-zA-Z]|_\\d)(?:(?=(_?[a-zA-Z0-9]))\\${captureIndex})*`;
     };
-    const multDimArrayRegex = "(\\[\\d+(,\\d+){0,2}])";
-    const arrayRegex = "(\\[\\d+])";
-    const bitIndexRegex = "(\\.\\d{1,2})";
+    const multDimArrayRegex = '(\\[\\d+(,\\d+){0,2}])';
+    const arrayRegex = '(\\[\\d+])';
+    const bitIndexRegex = '(\\.\\d{1,2})';
 
     // user regex for user tags
     const userRegex = new RegExp(
-      "^(Program:" +
+      '^(Program:' +
       nameRegex(3) +
-      "\\.)?" + // optional program name
+      '\\.)?' + // optional program name
       nameRegex(5) +
       multDimArrayRegex +
-      "?" + // tag name
-      "(\\." +
+      '?' + // tag name
+      '(\\.' +
       nameRegex(10) +
       arrayRegex +
-      "?)*" + // option member name
+      '?)*' + // option member name
         bitIndexRegex +
-        "?$"
+        '?$'
     ); // optional bit index
     // full user regex
     // ^(Program:(_?[a-zA-Z]|_\d)(?:(?=(_?[a-zA-Z0-9]))\3)*\.)?(_?[a-zA-Z]|_\d)(?:(?=(_?[a-zA-Z0-9]))\5)*(\[\d+(,\d+){0,2}])?(\.(_?[a-zA-Z]|_\d)(?:(?=(_?[a-zA-Z0-9]))\10)*(\[\d+])?)*(\.\d{1,2})?$
 
     // module regex for module tags
     const moduleRegex = new RegExp(
-      "^" +
+      '^' +
       nameRegex(2) + // module name
-      "(:\\d{1,2})?" + // optional slot num (not required for rack optimized connections)
-      ":[IOC]" + // input/output/config
-      "(\\." +
+      '(:\\d{1,2})?' + // optional slot num (not required for rack optimized connections)
+      ':[IOC]' + // input/output/config
+      '(\\.' +
       nameRegex(6) +
       arrayRegex +
-      "?)?" + // optional member with optional array index
+      '?)?' + // optional member with optional array index
         bitIndexRegex +
-        "?$"
+        '?$'
     ); // optional bit index
     // full module regex
     // ^(_?[a-zA-Z]|_\d)(?:(?=(_?[a-zA-Z0-9]))\2)*(:\d{1,2})?:[IOC](\.(_?[a-zA-Z]|_\d)(?:(?=(_?[a-zA-Z0-9]))\6)*(\[\d+])?)?(\.\d{1,2})?$
@@ -728,9 +728,9 @@ class Tag extends EventEmitter {
  */
 const hash = input => {
   return crypto
-    .createHash("md5")
+    .createHash('md5')
     .update(input)
-    .digest("hex");
+    .digest('hex');
 };
 
 module.exports = Tag;

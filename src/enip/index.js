@@ -283,7 +283,8 @@ class ENIP extends Socket {
         },
       };
 
-    const events = Object.keys(eventSpec);
+    const _trace = new Error('Error during consume()'); // Capture stack trace at time of call
+    _trace.events = Object.keys(eventSpec);
 
     return new Promise((resolve, reject) => {
       const listeners = {};
@@ -299,11 +300,18 @@ class ENIP extends Socket {
           this.removeListener(event, listener);
         }
 
-        if (err && !(err instanceof Error))
-          err = Object.assign(new Error(`ENIP Error`), err);
-
-        // Resolve / reject
-        err ? reject(err) : resolve(data);
+        if (err) {
+          if (typeof(err) == 'string') {
+            _trace.message = `consume() ${err}`;
+            err = _trace;
+          } else if (!(err instanceof Error)) {
+            _trace.message = `consume() error`;
+            err = Object.assign(_trace, err);
+          }
+          reject(err);
+        } else {
+          resolve(data);
+        }
       };
 
       // Connect event handlers
@@ -319,10 +327,7 @@ class ENIP extends Socket {
         this.on(event, listeners[event]);
       }
 
-      const timer = setTimeout(
-        () => finish(new Error(`consume(${events}) timeout`)),
-        timeout
-      );
+      const timer = setTimeout(() => finish(`timeout`), timeout);
     });
   }
 

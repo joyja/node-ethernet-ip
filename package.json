@@ -2,7 +2,7 @@
     "name": "ethernet-ip",
     "version": "2.0.0-beta.0",
     "description": "A simple node interface for Ethernet/IP.",
-    "main": "./src/index.js",
+    "main": "./index.js",
     "scripts": {
         "test": "npm run lint && jest && npm run test:coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
         "test:local": "npm run lint && jest && npm run test:coverage",

@@ -1,6 +1,6 @@
 {
     "name": "tentacle-ethernet-ip",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Fork of cmseaton's node-ethernet-ip (forked by SerafinTech then by TendIncs) javascript Ethernet/IP library. A simple node interface for Ethernet/IP.",
     "main": "./src/index.js",
     "scripts": {

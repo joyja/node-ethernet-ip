@@ -745,17 +745,8 @@ class Controller extends ENIP {
     const data = await promiseTimeout(
       new Promise((resolve, reject) => {
         this.on('Read Tag', async (err, data) => {
-          if (err && err.generalStatusCode !== 6) {
-            reject(err);
-            return;
-          }
-
-          if (err && err.generalStatusCode === 6) {
-            await this._readTagFragmented(tag, size).catch(reject);
-            resolve(null);
-          } else {
-            resolve(data);
-          }
+          if (err) reject(err);
+          resolve(data);
         });
       }),
       10000,

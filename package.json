@@ -1,7 +1,7 @@
 {
-    "name": "ethernet-ip",
-    "version": "2.0.0-beta.0",
-    "description": "A simple node interface for Ethernet/IP.",
+    "name": "tentacle-ethernet-ip",
+    "version": "0.0.4",
+    "description": "Fork of cmseaton's node-ethernet-ip (forked by SerafinTech then by TendIncs) javascript Ethernet/IP library. A simple node interface for Ethernet/IP.",
     "main": "./src/index.js",
     "scripts": {
         "test": "npm run lint && jest && npm run test:coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
@@ -41,10 +41,10 @@
         "eslint-plugin-jest": "^21.22.0",
         "jest": "25.1.0"
     },
-    "author": "Canaan Seaton",
+    "author": "James A. Joy",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/cmseaton42/node-ethernet-ip"
+        "url": "https://github.com/joyja/tentacle-ethernet-ip"
     }
 }

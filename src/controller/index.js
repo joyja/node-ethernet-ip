@@ -749,7 +749,7 @@ class Controller extends ENIP {
           resolve(data);
         });
       }),
-      10000,
+      30000,
       readTagErr
     );
 

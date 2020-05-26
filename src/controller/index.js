@@ -696,7 +696,7 @@ class Controller extends ENIP {
     // Wait for Response
     return await promiseTimeout(
       tagList.getControllerTags(this, program),
-      10000,
+      60000,
       getTagListErr
     );
   }
@@ -741,7 +741,7 @@ class Controller extends ENIP {
       `TIMEOUT occurred while writing Reading Tag: ${tag.name}.`
     );
 
-    // Wait for Response
+    // Wait for ResponseR
     const data = await promiseTimeout(
       new Promise((resolve, reject) => {
         this.on('Read Tag', async (err, data) => {
